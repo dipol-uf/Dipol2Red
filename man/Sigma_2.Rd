@@ -5,7 +5,7 @@
 \title{Sigma_2}
 \usage{
 Sigma_2(data, bandInfo, eqtrialCorrFactor = 0.034907, ittMax = 500,
-  eps = 1e-16)
+  eps = 1e-16, date = JD, obs = Obs)
 }
 \arguments{
 \item{data}{Input data in form of a \code{tibble}.}
@@ -19,6 +19,12 @@ filter descriptions.}
 
 \item{eps}{Tolerance. If average difference between previous and current step
 is smaller than \code{eps}, execution stops.}
+
+\item{date}{Name of the date column. Supports \code{rlang}
+quasiquotiong.}
+
+\item{obs}{Name of the observations column. Supports \code{rlang}
+quasiquotiong.}
 }
 \description{
 Sigma_2
