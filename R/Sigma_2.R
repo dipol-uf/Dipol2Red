@@ -35,14 +35,24 @@ utils::globalVariables(c(
 #' @param ittMax Maximum iterations to perform.
 #' @param eps Tolerance. If average difference between previous and current step
 #' is smaller than \code{eps}, execution stops.
+#' @param date Name of the date column. Supports \code{rlang}
+#' quasiquotiong.
+#' @param obs Name of the observations column. Supports \code{rlang}
+#' quasiquotiong.
 #' @export
 #' @importFrom dplyr %>% pull mutate group_by summarise if_else n select
+#' @importFrom dplyr transmute
 #' @importFrom magrittr %<>% extract extract2 subtract
+#' @importFrom rlang enquo !!
 Sigma_2 <- function(data,
                         bandInfo,
                         eqtrialCorrFactor = 0.034907,
                         ittMax = 500,
-                        eps = 1e-16) {
+                        eps = 1e-16,
+                        date = JD,
+                        obs = Obs) {
+    date <- enquo(date)
+    obs <- enquo(obs)
     nObsPerMes <- 4
 
     GetPX <- function(x)
@@ -61,7 +71,7 @@ Sigma_2 <- function(data,
     delta <- 1e100
 
     trnsfData <- data %>%
-        mutate(Q = 10 ^ (0.4 * Obs)) %>%
+        transmute(JD = !!date, Q = 10 ^ (0.4 * !!obs)) %>%
         mutate(Id = (1:n() - 1) %/% nObsPerMes) %>%
         mutate(Id = as.integer(Id) + 1L) %>%
         group_by(Id)
