@@ -1,0 +1,6 @@
+**/.vs/*
+**/.Rproj.user
+**/.Rhistory
+**/.RData
+**/*Rcheck/*
+**/*tar.gz
