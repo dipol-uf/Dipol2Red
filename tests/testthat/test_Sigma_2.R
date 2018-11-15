@@ -23,9 +23,11 @@
 
 library(dplyr)
 library(purrr)
+library(magrittr)
+library(rlang)
+library(readr)
 context("[Sigma_2] tests.")
 test_that("Executing [Sigma_2] on the test data", {
-
     pth <- system.file("tests", "legacy_descriptor.dat",
                     package = "Dipol2Red", mustWork = TRUE)
 
@@ -53,4 +55,22 @@ test_that("Executing [Sigma_2] on the test data", {
     expect_equal(result$SG, c(0.0561595, 0.0658703), tolerance = 1e-7)
     expect_equal(result$SG_A, c(2.6839, 2.7947), tolerance = 1e-4)
     expect_equal(2 * result$N * result$Ratio, c(16, 3))
+})
+
+test_that("[Sigma_2] handles column names", {
+     pth <- system.file("tests", "test1v.csv",
+                    package = "Dipol2Red", mustWork = TRUE)
+
+    data1 <- read_csv(pth)
+    data2 <- data1 %>% set_names(c("NotJD", "Smth", "Obs1234"))
+    bandInfo <- get(data("BandInfo", package = "Dipol2Red")) %>%
+        filter(Band == "V")
+
+    expect_error(Sigma_2(data2, bandInfo), "Binding not found")
+
+   walk2(Sigma_2(data2, bandInfo, date = NotJD, obs = Obs1234),
+        Sigma_2(data2, bandInfo, date = !!sym("NotJD"), obs = !!sym("Obs1234")),
+        expect_equal)
+
+
 })
