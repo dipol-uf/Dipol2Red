@@ -3,6 +3,7 @@
 export(LoadFromLegacyDescriptor)
 export(ReadLegacyDescriptor)
 export(Sigma_2)
+importFrom(assertthat,assert_that)
 importFrom(dplyr,"%>%")
 importFrom(dplyr,group_by)
 importFrom(dplyr,if_else)

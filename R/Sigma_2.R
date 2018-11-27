@@ -44,8 +44,9 @@ utils::globalVariables(c(
 #' @importFrom dplyr transmute
 #' @importFrom magrittr %<>% extract extract2 subtract
 #' @importFrom rlang enquo !!
+#' @importFrom assertthat assert_that
 Sigma_2 <- function(data,
-                        bandInfo,
+                        bandInfo = NULL,
                         eqtrialCorrFactor = 0.034907,
                         ittMax = 500,
                         eps = 1e-16,
@@ -53,7 +54,13 @@ Sigma_2 <- function(data,
                         obs = Obs) {
     date <- enquo(date)
     obs <- enquo(obs)
-    nObsPerMes <- 4
+    # `Magical` parameter.
+    # Every 4 observations give 1 polarization measurement.
+    nObsPerMes <- 4 
+    assert_that(nrow(data) %% nObsPerMes == 0,
+        msg = paste(
+            "Input table should have a multiple of", nObsPerMes, "rows"))
+
 
     GetPX <- function(x)
         100.0 * (x[1] - x[3])
@@ -61,7 +68,7 @@ Sigma_2 <- function(data,
     GetPY <- function(x)
         100.0 * (x[2] - x[4])
 
-    p0 <- bandInfo %>% extract(1, c("Px", "Py")) %>% as.numeric
+    p0 <- bandInfo %>% extract(1, c("Px", "Py")) %>% as.numeric 
     a0 <- bandInfo %>% pull("Angle")
     # Store mean polarizations between iterations
     pxMean <- rep(0, nrow(data) / nObsPerMes)
@@ -81,61 +88,78 @@ Sigma_2 <- function(data,
                   PX = GetPX(Q) / sQ,
                   PY = GetPY(Q) / sQ) %>%
         mutate(PX = PX - p0[1], PY = PY - p0[2])
-    for (i in seq(1, ittMax, by = 1)) {
+
+    if (nrow(prepData) == 1L) {
         result <- prepData %>%
-            mutate(WX = 1, WY = 1) %>%
-            mutate(mPX = pxMean, mPY = pyMean) %>%
-            mutate(dX = abs(PX - mPX), dY = abs(PY - mPY)) %>% {
-                if (i > 1) {
-                    mutate(., WX = if_else(dX > 2 * std,
-                        1 / (2 * dX / std - 3) ^ 2, WX)) %>%
-                    mutate(WX = if_else(WX < 0.11, 0, WX)) %>%
-                    mutate(WY = if_else(dY > 2 * std,
-                        1 / (2 * dY / std - 3) ^ 2, WY)) %>%
-                    mutate(WY = if_else(WY < 0.11, 0, WY))
-                }
-                else
-                    .
-            } %>%
-            summarise(
-                JD = mean(mJD),
-                NW = sum(sum(WX < 1), sum(WY < 1)),
-                Px = as.numeric(WX %*% PX / sum(WX)),
-                Py = as.numeric(WY %*% PY / sum(WY)),
+            transmute(JD = mJD, Px = PX, Py = PY) %>%
+            mutate(SG = 0, SG_A = 0, Cov = 0, N = 1L, Ratio = 0, Itt = 1L) %>%
+            mutate(
                 P = sqrt(Px ^ 2 + Py ^ 2),
-                A = (90 / pi * atan2(Py, Px) + a0) %% 180,
-                SGx = as.numeric(WX %*% c(Px - PX) ^ 2 / sum(WX)),
-                SGy = as.numeric(WY %*% c(Py - PY) ^ 2 / sum(WY)),
-                SG = sqrt((SGx + SGy) / (sum(WX) + sum(WY) - 2)),
-                SG_A = 90 / pi * atan2(SG, P),
-                Cov = as.numeric(sqrt(WX * WY) %*%
-                (c(Px - PX) * c(Py - PY)) /
-                    sqrt(sum(WX) * sum(WY))),
-                STD = SG * sqrt((sum(WX) + sum(WY)) / 2),
-                Ratio = 0.5 * NW / nrow(.),
-                N = n(),
-                Itt = i)
-
-        delta <- sqrt(
-                    ((mean(pxMean) - result$Px) ^ 2 +
-                    (mean(pyMean) - result$Py) ^ 2) /
-                    (length(pxMean) + length(pyMean)))
-
-        pxMean <- rep(result$Px, length(pxMean))
-        pyMean <- rep(result$Py, length(pyMean))
-
-        result %<>%
+                A = (90 / pi * atan2(Py, Px) + a0) %% 180) %>%
             mutate(
                 A = 90 / pi * A * eqtrialCorrFactor,
                 Px = P * cos(pi / 90 * A),
                 Py = P * sin(pi / 90 * A))
-
-        std <- result %>% pull(STD)
-
-        if (delta <= eps)
-            break
-
     }
+
+    else
+        for (i in seq(1, ittMax, by = 1)) {
+            result <- prepData %>%
+                mutate(WX = 1, WY = 1) %>%
+                mutate(mPX = pxMean, mPY = pyMean) %>%
+                mutate(dX = abs(PX - mPX), dY = abs(PY - mPY)) %>% {
+                    if (i > 1) {
+                        mutate(., WX = if_else(dX > 2 * std,
+                            1 / (2 * dX / std - 3) ^ 2, WX)) %>%
+                        mutate(WX = if_else(WX < 0.11, 0, WX)) %>%
+                        mutate(WY = if_else(dY > 2 * std,
+                            1 / (2 * dY / std - 3) ^ 2, WY)) %>%
+                        mutate(WY = if_else(WY < 0.11, 0, WY))
+                    }
+                    else
+                        .
+                } %>%
+                summarise(
+                    JD = mean(mJD),
+                    NW = sum(sum(WX < 1), sum(WY < 1)),
+                    Px = as.numeric(WX %*% PX / sum(WX)),
+                    Py = as.numeric(WY %*% PY / sum(WY)),
+                    P = sqrt(Px ^ 2 + Py ^ 2),
+                    A = (90 / pi * atan2(Py, Px) + a0) %% 180,
+                    SGx = as.numeric(WX %*% c(Px - PX) ^ 2 / sum(WX)),
+                    SGy = as.numeric(WY %*% c(Py - PY) ^ 2 / sum(WY)),
+                    SG = sqrt((SGx + SGy) / (sum(WX) + sum(WY) - 2L)),
+                    SG_A = 90 / pi * atan2(SG, P),
+                    Cov = as.numeric(sqrt(WX * WY) %*%
+                    (c(Px - PX) * c(Py - PY)) /
+                        sqrt(sum(WX) * sum(WY))),
+                    STD = SG * sqrt((sum(WX) + sum(WY)) / 2),
+                    Ratio = 0.5 * NW / nrow(.),
+                    N = n(),
+                    Itt = i)
+
+            delta <- sqrt(
+                        ((mean(pxMean) - result$Px) ^ 2 +
+                        (mean(pyMean) - result$Py) ^ 2) /
+                        (length(pxMean) + length(pyMean)))
+
+            pxMean <- rep(result$Px, length(pxMean))
+            pyMean <- rep(result$Py, length(pyMean))
+
+            result %<>%
+                mutate(
+                    A = 90 / pi * A * eqtrialCorrFactor,
+                    Px = P * cos(pi / 90 * A),
+                    Py = P * sin(pi / 90 * A))
+
+
+            std <- result %>% pull(STD)
+
+            if (delta <= eps)
+                break
+
+        }
+
 
     return(result %>%
                select(JD, Px, Py, P, SG, A, SG_A, Cov, N, Ratio, Itt))
