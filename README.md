@@ -15,5 +15,5 @@ The tool supports polarimeters with 22.5 deg steps, converting every 4 magnitude
 Default calibrations can be accessed through `BandInfo` data (`data(BandInfo)`) and should be updated if newer calibrations are available.
 It is possible to obtain preliminary estimates without proper calibrations (as instrument's accuracy allows it), but for the proper final result calibrations are required.
 
-For legacy comparison, `ReadLegacyDescriptor` producer a decriptor of individual input files and `LoadFromLegacyDescriptor` uses the output of the previus function to colelct data from `*.csv` files.
+For the sake of legacy compatibility, `ReadLegacyDescriptor` producer a decriptor of individual input files and `LoadFromLegacyDescriptor` uses the output of the previus function to colelct data from `*.csv` files.
 Alternatively, data can be loaded into a table manually and date/measurement column names can be controlled through `date` and `obs_mag` parameters of `Sigma_2`.
