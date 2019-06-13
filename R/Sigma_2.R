@@ -46,16 +46,25 @@ utils::globalVariables(c(
 #' @importFrom dplyr transmute
 #' @importFrom magrittr %<>% extract extract2 subtract
 #' @importFrom rlang enquo !!
-#' @importFrom assertthat assert_that
+#' @importFrom assertthat assert_that on_failure is.number is.count
 Sigma_2 <- function(data,
                         bandInfo = NULL,
                         eqtrialCorrFactor = 0.034907,
-                        ittMax = 500,
+                        ittMax = 500L,
                         eps = 1e-16,
                         date = JD,
                         obs = Obs) {
     date <- enquo(date)
     obs <- enquo(obs)
+
+    on_failure(is_tibble) <- function(call, env) paste0("`", deparse(call[[2]]), "` is not a tibble")
+    assert_that(is_tibble(data))
+    assert_that(is_tibble(bandInfo))
+
+    assert_that(is.number(eqtrialCorrFactor))
+    assert_that(is.count(ittMax))
+    assert_that(is.number(eps), eps > 0)
+
     # `Magical` parameter.
     # Every 4 observations give 1 polarization measurement.
     nObsPerMes <- 4
