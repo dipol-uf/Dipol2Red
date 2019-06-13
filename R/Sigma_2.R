@@ -46,7 +46,7 @@ utils::globalVariables(c(
 #' @importFrom dplyr transmute
 #' @importFrom magrittr %<>% extract extract2 subtract
 #' @importFrom rlang enquo !!
-#' @importFrom assertthat assert_that on_failure is.number is.count
+#' @importFrom assertthat assert_that on_failure is.number is.count on_failure<-
 Sigma_2 <- function(data,
                         bandInfo = NULL,
                         eqtrialCorrFactor = 0.034907,
@@ -70,30 +70,6 @@ Sigma_2 <- function(data,
     nObsPerMes <- 4
     err_msg <- paste("Input table should have a multiple of", nObsPerMes, "rows")
     assert_that(nrow(data) %% nObsPerMes == 0, msg = err_msg)
-
-
-    generate_Q <- function(p_x, p_y, w_x, w_y, m_p_x, m_p_y,...) {
-        x <- p_x - m_p_x
-        y <- p_y - m_p_y
-
-        w_x_sum <- sum(w_x)
-        w_y_sum <- sum(w_y)
-        w_xy_sum <- sum(sqrt(0.5 * (w_x^2 + w_y^2)))
-
-        w_x_corr <- w_x_sum^2 - sum(w_x^2)
-        w_y_corr <- w_y_sum ^ 2 - sum(w_y ^ 2)
-        w_xy_corr <- w_xy_sum ^ 2 - 0.5 * sum(w_x ^ 2 + w_y ^ 2)
-
-        mtrx <- matrix(c(
-            w_x_sum * w_x %*% (x * x) / w_x_corr,
-            w_xy_sum * sqrt(w_y ^ 2 + w_x ^ 2) %*% (y * x) / w_xy_corr,
-            w_xy_sum * sqrt(w_x ^ 2 + w_y ^ 2) %*% (x * y) / w_xy_corr,
-            w_y_sum * w_y %*% (y * y) / w_y_corr
-        ), ncol = 2)
-
-
-       return(mtrx)
-    }
 
     GetPX <- function(x)
         100.0 * (x[1] - x[3])

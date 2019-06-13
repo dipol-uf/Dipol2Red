@@ -56,8 +56,8 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
     mean1 <- data %>% select(!!p_x, !!p_y) %>% slice(1L) %>% flatten_dbl
     mean2 <- data %>% select(!!p_x, !!p_y) %>% slice(2L) %>% flatten_dbl
 
-    sigma1 <- data %>% extract2(1, cov) %>% print
-    sigma2 <- data %>% extract2(2, cov) %>% print
+    sigma1 <- data %>% extract2(1, cov)
+    sigma2 <- data %>% extract2(2, cov)
 
     c(n1, n2) %<-% (data %>% pull(!!n))
 
