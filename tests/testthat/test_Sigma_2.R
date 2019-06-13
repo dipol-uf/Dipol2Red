@@ -68,7 +68,7 @@ test_that("[Sigma_2] handles column names", {
     bandInfo <- get(data("BandInfo", package = "Dipol2Red")) %>%
         filter(Band == "V")
 
-    expect_error(Sigma_2(data2, bandInfo), "Binding not found")
+    expect_error(Sigma_2(data2, bandInfo), "object 'JD' not found")
 
    walk2(Sigma_2(data2, bandInfo, date = NotJD, obs = Obs1234),
         Sigma_2(data2, bandInfo, date = !!sym("NotJD"), obs = !!sym("Obs1234")),
