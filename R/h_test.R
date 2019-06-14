@@ -87,7 +87,7 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
         "p" = p, "1-p" = p_inv,
         "lg(p)" = lgp,
         "lg(1-p)" = lgp_inv,
-        "d1" = d1, "d2" = d2))
+        "d1" = d1, "d2" = d2, "n" = n1 + n2))
     #"beta" = beta,
     #"p0" = p0, "p1" = p1, "d1" = d1, "d2" = d2)
 
