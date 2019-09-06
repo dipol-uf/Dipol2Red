@@ -28,7 +28,7 @@ utils::globalVariables(c(
                        "mPX", "mPY", ".", "dX", "WX", "dY", "WY",
                        "mJD", "Px", "Py", "SGx", "SGy", "SG", "P",
                        "NW", "A", "STD", "SG_A", "Cov", "N", "Ratio",
-                       "Itt"))
+                       "Itt", "Angle"))
 #' @title Sigma_2
 #' @param data Input data in form of a \code{tibble}.
 #' @param bandInfo A row from a \code{tibble} containing
@@ -43,7 +43,7 @@ utils::globalVariables(c(
 #' quasiquotiong.
 #' @export
 #' @importFrom dplyr %>% pull mutate group_by summarise if_else n select
-#' @importFrom dplyr transmute
+#' @importFrom dplyr transmute group_map is_grouped_df bind_cols bind_rows
 #' @importFrom magrittr %<>% extract extract2 subtract
 #' @importFrom rlang enquo !!
 #' @importFrom assertthat assert_that on_failure is.number is.count on_failure<-
