@@ -60,11 +60,8 @@ Sigma_2 <- function(data,
     date <- enquo(date)
     obs <- enquo(obs)
 
-    assert_that(is.string(filter))
-
-    on_failure(is_tibble) <- function(call, env) paste0("`", deparse(call[[2]]), "` is not a tibble")
     assert_that(is_tibble(data))
-
+    assert_that(is.string(filter))
     assert_that(is.number(eqtrialCorrFactor))
     assert_that(is.count(ittMax))
     assert_that(is.number(eps), eps > 0)
@@ -95,6 +92,8 @@ Sigma_2 <- function(data,
 
     return (result)
 }
+
+assertthat::on_failure(is_tibble) <- function(call, env) paste0("`", deparse(call[[2]]), "` is not a tibble")
 
 dot_prod <- function(x, y) {
     vec_cast_common(x, y)

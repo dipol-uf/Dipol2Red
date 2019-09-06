@@ -38,9 +38,6 @@
 #' @importFrom rlang is_double is_integer
 
 generate_Q <- function(p_x, p_y, w_x, w_y, p_x_mean, p_y_mean) {
-    is_numeric <- function(x) is_double(x) || is_integer(x)
-    on_failure(is_numeric) <- function(call, env)
-            paste0("`", deparse(call[[2]]), "` is not a vector of real numbers")
 
     assert_that(is_numeric(p_x))
     assert_that(is_numeric(p_y))
@@ -71,3 +68,7 @@ generate_Q <- function(p_x, p_y, w_x, w_y, p_x_mean, p_y_mean) {
 
     return(mtrx)
 }
+
+is_numeric <- function(x) is_double(x) || is_integer(x)
+assertthat::on_failure(is_numeric) <- function(call, env)
+        paste0("`", deparse(call[[2]]), "` is not a vector of real numbers")
