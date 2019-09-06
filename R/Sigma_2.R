@@ -65,20 +65,45 @@ Sigma_2 <- function(data,
     assert_that(is.count(ittMax))
     assert_that(is.number(eps), eps > 0)
 
-    # `Magical` parameter.
-    # Every 4 observations give 1 polarization measurement.
-    nObsPerMes <- 4
-    err_msg <- paste("Input table should have a multiple of", nObsPerMes, "rows")
-    assert_that(nrow(data) %% nObsPerMes == 0, msg = err_msg)
+    p0 <- bandInfo %>% extract(1, c("Px", "Py")) %>% as.numeric
+    a0 <- bandInfo %>% pull(Angle)
+
+    if (is_grouped_df(data))
+        result <- data %>%
+            group_map(
+                ~do_work_sigma2(.x, !!date, !!obs, p0, a0, eqtrialCorrFactor, ittMax, eps) %>%
+                    select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt) %>%
+                    bind_cols(.y)) %>%
+            bind_rows
+    else
+        result <- do_work_sigma2(data, !!date, !!obs, p0, a0, eqtrialCorrFactor, ittMax, eps) %>%
+               select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt)
+
+    return (result)
+}
+
+
+do_work_sigma2 <- function(data, date, obs, p0, a0,
+                            eqtrialCorrFactor,
+                            ittMax,
+                            eps) {
+
+    date <- enquo(date)
+    obs <- enquo(obs)
 
     GetPX <- function(x)
         100.0 * (x[1] - x[3])
 
     GetPY <- function(x)
         100.0 * (x[2] - x[4])
-    
-    p0 <- bandInfo %>% extract(1, c("Px", "Py")) %>% as.numeric 
-    a0 <- bandInfo %>% pull(Angle)
+
+
+    # `Magical` parameter.
+    # Every 4 observations give 1 polarization measurement.
+    nObsPerMes <- 4
+    err_msg <- paste("Input table should have a multiple of", nObsPerMes, "rows")
+    assert_that(nrow(data) %% nObsPerMes == 0, msg = err_msg)
+
     # Store mean polarizations between iterations
     pxMean <- rep(0, nrow(data) / nObsPerMes)
     pyMean <- rep(0, nrow(data) / nObsPerMes)
@@ -128,7 +153,7 @@ Sigma_2 <- function(data,
                     }
                     else
                         .
-                } %>%
+                }  %>%
                 summarise(
                     JD = mean(mJD),
                     NW = sum(sum(WX < 1), sum(WY < 1)),
@@ -140,9 +165,6 @@ Sigma_2 <- function(data,
                     SGy = as.numeric(WY %*% c(Py - PY) ^ 2 / sum(WY)),
                     SG = sqrt((SGx + SGy) / (sum(WX) + sum(WY) - 2L)),
                     SG_A = 90 / pi * atan2(SG, P),
-                    #Cov = as.numeric(sqrt(WX * WY) %*%
-                        #(c(Px - PX) * c(Py - PY)) /
-                            #sqrt(sum(WX) * sum(WY))),
                     Q = list(generate_Q(PX, PY, WX, WY, Px, Py)),
                     STD = SG * sqrt((sum(WX) + sum(WY)) / 2),
                     Ratio = 0.5 * NW / nrow(.),
@@ -171,8 +193,5 @@ Sigma_2 <- function(data,
 
         }
 
-    return(result %>%
-              #select(JD, Px, Py, P, SG, A, SG_A, Cov, Q, N, SGx, SGy))
-
-               select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt))
+    result
 }
