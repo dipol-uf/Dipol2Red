@@ -23,7 +23,7 @@
 #   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 #   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-utils::globalVariables(c(
+utils::globalVariables(vctrs::vec_c(
                        "Obs", "Id", "JD", "Q", "sQ", "PX", "PY",
                        "mPX", "mPY", ".", "dX", "WX", "dY", "WY",
                        "mJD", "Px", "Py", "SGx", "SGy", "SG", "P",
@@ -46,8 +46,9 @@ utils::globalVariables(c(
 #' @importFrom dplyr %>% pull mutate group_by summarise if_else n select
 #' @importFrom dplyr transmute group_map is_grouped_df bind_cols bind_rows
 #' @importFrom magrittr %<>% extract extract2 subtract
-#' @importFrom rlang enquo !! is_null
+#' @importFrom rlang enquo !! is_null flatten_dbl as_function
 #' @importFrom assertthat assert_that on_failure is.string is.number is.count on_failure<-
+#' @importFrom vctrs vec_c vec_cast_common vec_size vec_recycle
 Sigma_2 <- function(data,
                         filter = "B",
                         bandInfo = NULL,
@@ -78,8 +79,8 @@ Sigma_2 <- function(data,
 
     bandInfo %<>% filter(Filter == filter)
 
-    p0 <- bandInfo %>% extract(1, c("Px", "Py")) %>% as.numeric
-    a0 <- bandInfo %>% pull(Angle)
+    p0 <- bandInfo %>% extract(1L, vec_c("Px", "Py")) %>% flatten_dbl
+    a0 <- bandInfo %>% extract2(1L, "Angle") 
 
     if (is_grouped_df(data))
         result <- data %>%
@@ -95,68 +96,69 @@ Sigma_2 <- function(data,
     return (result)
 }
 
+dot_prod <- function(x, y) {
+    vec_cast_common(x, y)
+    sum(x * y)
+}
+
 
 do_work_sigma2 <- function(data, date, obs, p0, a0,
                             eqtrialCorrFactor,
-                            ittMax,
-                            eps) {
+                            ittMax, eps,
+                            get_px = ~100.0 * (.x[1] - .x[3]),
+                            get_py = ~100.0 * (.x[2] - .x[4])) {
 
     date <- enquo(date)
     obs <- enquo(obs)
 
-    GetPX <- function(x)
-        100.0 * (x[1] - x[3])
-
-    GetPY <- function(x)
-        100.0 * (x[2] - x[4])
-
+    get_px <- as_function(get_px)
+    get_py <- as_function(get_py)
 
     # `Magical` parameter.
     # Every 4 observations give 1 polarization measurement.
-    nObsPerMes <- 4
+    nObsPerMes <- 4L
     err_msg <- paste("Input table should have a multiple of", nObsPerMes, "rows")
-    assert_that(nrow(data) %% nObsPerMes == 0, msg = err_msg)
+    assert_that(vec_size(data) %% nObsPerMes == 0L, msg = err_msg)
 
     # Store mean polarizations between iterations
-    pxMean <- rep(0, nrow(data) / nObsPerMes)
-    pyMean <- rep(0, nrow(data) / nObsPerMes)
+    pxMean <- vec_recycle(0L, vec_size(data) / nObsPerMes)
+    pyMean <- vec_recycle(0L, vec_size(data) / nObsPerMes)
 
     std <- 0
     delta <- 1e100
 
     trnsfData <- data %>%
         transmute(JD = !!date, Q = 10 ^ (0.4 * !!obs)) %>%
-        mutate(Id = (1L:n() - 1L) %/% nObsPerMes) %>%
-        mutate(Id = as.integer(Id) + 1L) %>%
+        mutate(Id = (1L:n() - 1L) %/% nObsPerMes + 1L) %>%
         group_by(Id)
 
     prepData <- trnsfData %>%
         summarise(mJD = mean(JD), sQ = sum(Q),
-                  PX = GetPX(Q) / sQ,
-                  PY = GetPY(Q) / sQ) %>%
+                  PX = get_px(Q) / sQ,
+                  PY = get_py(Q) / sQ) %>%
         mutate(PX = PX - p0[1], PY = PY - p0[2])
 
-    if (nrow(prepData) == 1L) {
+    if (vec_size(prepData) == 1L) {
         result <- prepData %>%
             transmute(JD = mJD, Px = PX, Py = PY) %>%
             mutate(SG = 0, SG_A = 0, Cov = 0, N = 1L, Ratio = 0, Itt = 1L) %>%
             mutate(
-                P = sqrt(Px ^ 2 + Py ^ 2),
+                P = sqrt(Px ^ 2L + Py ^ 2L),
                 A = (90 / pi * atan2(Py, Px) + a0) %% 180) %>%
             mutate(
                 A = 90 / pi * A * eqtrialCorrFactor,
                 Px = P * cos(pi / 90 * A),
                 Py = P * sin(pi / 90 * A),
-                Q = list(matrix(rep(NA_real_, 4), ncol = 2)))
+                Q = list(matrix(vec_recycle(NA_real_, 4L), ncol = 2L)))
     }
 
     else
-        for (i in seq(1, ittMax, by = 1)) {
+        for (i in seq_len(ittMax)) {
             result <- prepData %>%
                 mutate(WX = 1, WY = 1) %>%
                 mutate(mPX = pxMean, mPY = pyMean) %>%
                 mutate(dX = abs(PX - mPX), dY = abs(PY - mPY)) %>% {
-                    if (i > 1) {
+                    if (i > 1L) {
                         mutate(., WX = if_else(dX > 2 * std,
                             1 / (2 * dX / std - 3) ^ 2, WX)) %>%
                         mutate(WX = if_else(WX < 0.11, 0, WX)) %>%
@@ -170,12 +172,12 @@ do_work_sigma2 <- function(data, date, obs, p0, a0,
                 summarise(
                     JD = mean(mJD),
                     NW = sum(sum(WX < 1), sum(WY < 1)),
-                    Px = as.numeric(WX %*% PX / sum(WX)),
-                    Py = as.numeric(WY %*% PY / sum(WY)),
+                    Px = dot_prod(WX, PX) / sum(WX),
+                    Py = dot_prod(WY, PY) / sum(WY),
                     P = sqrt(Px ^ 2 + Py ^ 2),
                     A = (90 / pi * atan2(Py, Px) + a0) %% 180,
-                    SGx = as.numeric(WX %*% c(Px - PX) ^ 2 / sum(WX)),
-                    SGy = as.numeric(WY %*% c(Py - PY) ^ 2 / sum(WY)),
+                    SGx = dot_prod(WX, c(Px - PX) ^ 2) / sum(WX),
+                    SGy = dot_prod(WY, c(Py - PY) ^ 2) / sum(WY),
                     SG = sqrt((SGx + SGy) / (sum(WX) + sum(WY) - 2L)),
                     SG_A = 90 / pi * atan2(SG, P),
                     Q = list(generate_Q(PX, PY, WX, WY, Px, Py)),
@@ -187,10 +189,10 @@ do_work_sigma2 <- function(data, date, obs, p0, a0,
             delta <- sqrt(
                         ((mean(pxMean) - result$Px) ^ 2 +
                         (mean(pyMean) - result$Py) ^ 2) /
-                        (length(pxMean) + length(pyMean)))
+                        (vec_size(pxMean) + vec_size(pyMean)))
 
-            pxMean <- rep(result$Px, length(pxMean))
-            pyMean <- rep(result$Py, length(pyMean))
+            pxMean <- vec_recycle(result$Px, vec_size(pxMean))
+            pyMean <- vec_recycle(result$Py, vec_size(pyMean))
 
             result %<>%
                 mutate(
