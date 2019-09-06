@@ -25,7 +25,11 @@
 
 
 library(testthat)
-library(Dipol2Red)
+if (interactive()) {
+    library(assertthat)
+    testthat::test_dir(fs::path("tests", "testthat"))
+} else{
+    library(Dipol2Red)
 
-testthat::test_check("Dipol2Red", reporter = default_reporter())
-#testthat::test_dir(fs::path("tests", "testthat"))
+    testthat::test_check("Dipol2Red", reporter = default_reporter())
+}
