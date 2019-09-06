@@ -25,7 +25,7 @@
 
 #' \itemize{
 #'      \item ID. Filter ID as used by legacy soft
-#'      \item Band. Filter name
+#'      \item Filter. Filter name
 #'      \item Angle. Zero-point poision angle of each filter
 #'      \item Px. Instrumental polarization in X axis
 #'      \item Py. Instrumental polarization in Y axis

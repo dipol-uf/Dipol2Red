@@ -27,4 +27,5 @@
 library(testthat)
 library(Dipol2Red)
 
-test_check("Dipol2Red", reporter = default_reporter())
+testthat::test_check("Dipol2Red", reporter = default_reporter())
+#testthat::test_dir(fs::path("tests", "testthat"))

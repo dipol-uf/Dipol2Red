@@ -4,13 +4,16 @@
 \alias{Sigma_2}
 \title{Sigma_2}
 \usage{
-Sigma_2(data, bandInfo = NULL, eqtrialCorrFactor = 0.034907,
-  ittMax = 500L, eps = 1e-16, date = JD, obs = Obs)
+Sigma_2(data, filter = "B", bandInfo = NULL,
+  eqtrialCorrFactor = 0.034907, ittMax = 500L, eps = 1e-16,
+  date = JD, obs = Obs)
 }
 \arguments{
 \item{data}{Input data in form of a \code{tibble}.}
 
-\item{bandInfo}{A row from a \code{tibble} containing
+\item{filter}{Filter name.}
+
+\item{bandInfo}{A \code{tibble} containing
 filter descriptions.}
 
 \item{eqtrialCorrFactor}{Equatorial correction for the angle.}

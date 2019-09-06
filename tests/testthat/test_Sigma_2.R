@@ -47,8 +47,8 @@ test_that("Executing [Sigma_2] on the test data", {
     result <- map2_dfr(data, desc,
         ~ Sigma_2(
             data = .x,
-            bandInfo = filter(bandInfo, ID == .y$Filter)
-        ))
+            filter = dplyr::filter(bandInfo, ID == .y$Filter)$Filter,
+            bandInfo = bandInfo))
 
     expect_equal(nrow(result), 2)
     expect_equal(result$JD, c(2458196.12, 2458222.10), tolerance = 1e-2)
@@ -66,12 +66,12 @@ test_that("[Sigma_2] handles column names", {
     data1 <- read_csv(pth)
     data2 <- data1 %>% set_names(c("NotJD", "Smth", "Obs1234"))
     bandInfo <- get(data("BandInfo", package = "Dipol2Red")) %>%
-        filter(Band == "V")
+        filter(Filter == "V")
 
-    expect_error(Sigma_2(data2, bandInfo), "object 'JD' not found")
+    expect_error(Sigma_2(data2, "V", bandInfo), "object 'JD' not found")
 
-   walk2(Sigma_2(data2, bandInfo, date = NotJD, obs = Obs1234),
-        Sigma_2(data2, bandInfo, date = !!sym("NotJD"), obs = !!sym("Obs1234")),
+   walk2(Sigma_2(data2, "V", bandInfo, date = NotJD, obs = Obs1234),
+        Sigma_2(data2, "V", bandInfo, date = !!sym("NotJD"), obs = !!sym("Obs1234")),
         expect_equal)
 
 

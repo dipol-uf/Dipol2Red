@@ -28,10 +28,11 @@ utils::globalVariables(c(
                        "mPX", "mPY", ".", "dX", "WX", "dY", "WY",
                        "mJD", "Px", "Py", "SGx", "SGy", "SG", "P",
                        "NW", "A", "STD", "SG_A", "Cov", "N", "Ratio",
-                       "Itt", "Angle"))
+                       "Itt", "Angle", ".x", "BandInfo"))
 #' @title Sigma_2
 #' @param data Input data in form of a \code{tibble}.
-#' @param bandInfo A row from a \code{tibble} containing
+#' @param filter Filter name.
+#' @param bandInfo A \code{tibble} containing
 #' filter descriptions.
 #' @param eqtrialCorrFactor Equatorial correction for the angle.
 #' @param ittMax Maximum iterations to perform.
@@ -45,9 +46,10 @@ utils::globalVariables(c(
 #' @importFrom dplyr %>% pull mutate group_by summarise if_else n select
 #' @importFrom dplyr transmute group_map is_grouped_df bind_cols bind_rows
 #' @importFrom magrittr %<>% extract extract2 subtract
-#' @importFrom rlang enquo !!
-#' @importFrom assertthat assert_that on_failure is.number is.count on_failure<-
+#' @importFrom rlang enquo !! is_null
+#' @importFrom assertthat assert_that on_failure is.string is.number is.count on_failure<-
 Sigma_2 <- function(data,
+                        filter = "B",
                         bandInfo = NULL,
                         eqtrialCorrFactor = 0.034907,
                         ittMax = 500L,
@@ -57,13 +59,24 @@ Sigma_2 <- function(data,
     date <- enquo(date)
     obs <- enquo(obs)
 
+    assert_that(is.string(filter))
+
     on_failure(is_tibble) <- function(call, env) paste0("`", deparse(call[[2]]), "` is not a tibble")
     assert_that(is_tibble(data))
-    assert_that(is_tibble(bandInfo))
 
     assert_that(is.number(eqtrialCorrFactor))
     assert_that(is.count(ittMax))
     assert_that(is.number(eps), eps > 0)
+
+    if (rlang::is_null(bandInfo)) {
+        if(!exists("BandInfo", envir = .GlobalEnv))
+            data("BandInfo", package = "Dipol2Red", envir = .GlobalEnv)
+        bandInfo <- BandInfo
+    }
+
+    assert_that(is_tibble(bandInfo))
+
+    bandInfo %<>% filter(Filter == filter)
 
     p0 <- bandInfo %>% extract(1, c("Px", "Py")) %>% as.numeric
     a0 <- bandInfo %>% pull(Angle)
