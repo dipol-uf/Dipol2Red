@@ -76,9 +76,9 @@ Sigma_2 <- function(data,
 
     GetPY <- function(x)
         100.0 * (x[2] - x[4])
-
+    
     p0 <- bandInfo %>% extract(1, c("Px", "Py")) %>% as.numeric 
-    a0 <- bandInfo %>% pull("Angle")
+    a0 <- bandInfo %>% pull(Angle)
     # Store mean polarizations between iterations
     pxMean <- rep(0, nrow(data) / nObsPerMes)
     pyMean <- rep(0, nrow(data) / nObsPerMes)
@@ -88,7 +88,7 @@ Sigma_2 <- function(data,
 
     trnsfData <- data %>%
         transmute(JD = !!date, Q = 10 ^ (0.4 * !!obs)) %>%
-        mutate(Id = (1:n() - 1) %/% nObsPerMes) %>%
+        mutate(Id = (1L:n() - 1L) %/% nObsPerMes) %>%
         mutate(Id = as.integer(Id) + 1L) %>%
         group_by(Id)
 
@@ -108,7 +108,8 @@ Sigma_2 <- function(data,
             mutate(
                 A = 90 / pi * A * eqtrialCorrFactor,
                 Px = P * cos(pi / 90 * A),
-                Py = P * sin(pi / 90 * A))
+                Py = P * sin(pi / 90 * A),
+                Q = list(matrix(rep(NA_real_, 4), ncol = 2)))
     }
 
     else
@@ -169,7 +170,6 @@ Sigma_2 <- function(data,
                 break
 
         }
-
 
     return(result %>%
               #select(JD, Px, Py, P, SG, A, SG_A, Cov, Q, N, SGx, SGy))
