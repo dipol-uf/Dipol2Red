@@ -2,6 +2,7 @@
 % Please edit documentation in R/LoadFromLegacyDescriptor.R
 \name{LoadFromLegacyDescriptor}
 \alias{LoadFromLegacyDescriptor}
+\alias{load_from_legacy_descriptor}
 \title{LoadFromLegacyDescriptor}
 \usage{
 LoadFromLegacyDescriptor(desc, root = ".")

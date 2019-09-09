@@ -25,35 +25,39 @@
 
 #' @title ReadLegacyDescriptor
 #' @param path Path to the descriptor file (e.g. \code{Vin.txt})
+#' @aliases read_legacy_descriptor
 #' @export
 #' @importFrom glue glue
-#' @importFrom readr read_lines
+#' @importFrom readr read_lines parse_integer
 #' @importFrom purrr map map_at
 #' @importFrom utils tail
 #' @importFrom stringr str_match
 #' @importFrom rlang set_names
 #' @importFrom purrr %>%
+#' @importFrom assertthat assert_that is.readable
+#' @importFrom vctrs vec_size vec_c
 ReadLegacyDescriptor <- function(path) {
-    if (!file.exists(path))
-        stop(glue("File `{path}` is not found."))
+    assert_that(is.readable(path))
 
     lines <- read_lines(path)
 
-    if ((length(lines) - 1) %% 2 != 0)
+    if ((vec_size(lines) - 1L) %% 2L != 0L)
         stop("Incorrect number of lines in the input file.")
 
     profiles <- seq(1L, (length(lines) - 1L) / 2L, by = 1L) %>%
-        subtract(1) %>%
-        map(~lines[2L * .x + 1:2]) %>%
-        map(~append(list(File = .x[1]),
+        subtract(1L) %>%
+        map(~lines[2L * .x + 1L:2L]) %>%
+        map(~append(list(File = .x[1L]),
             str_match(.x[2],
                 "^([0-9]+)\\ +([0-9]+)\\ +(.*)\\ +([0-9]+)$") %>%
-                as.character %>%
+                array %>% 
                 tail(-1) %>%
-                as.list %>%
-                map_at(c(1, 2, 4), as.integer)  %>%
+                map_at(vec_c(1L, 2L, 4L), parse_integer)  %>%
                 set_names(c("Start", "Count", "Object", "Filter"))
             ))
 
     return(profiles)
 }
+
+#' @export
+read_legacy_descriptor <- ReadLegacyDescriptor

@@ -2,6 +2,7 @@
 % Please edit documentation in R/Sigma_2.R
 \name{Sigma_2}
 \alias{Sigma_2}
+\alias{sigma_2}
 \title{Sigma_2}
 \usage{
 Sigma_2(data, filter = "B", bandInfo = NULL,

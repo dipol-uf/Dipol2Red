@@ -30,10 +30,10 @@ test_that("Reading data using legacy descriptor", {
     pth <- system.file("tests", "legacy_descriptor.dat",
                     package = "Dipol2Red", mustWork = TRUE)
 
-    desc <- ReadLegacyDescriptor(pth)
+    desc <- read_legacy_descriptor(pth)
 
     data <- desc %>%
-        LoadFromLegacyDescriptor(
+        load_from_legacy_descriptor(
             root = system.file(
                 "tests",
                 package = "Dipol2Red",

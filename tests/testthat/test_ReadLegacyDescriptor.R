@@ -28,7 +28,7 @@ test_that("Reading file", {
     pth <- system.file("tests", "legacy_descriptor.dat",
                     package = "Dipol2Red", mustWork = TRUE)
 
-    desc <- ReadLegacyDescriptor(pth)
+    desc <- read_legacy_descriptor(pth)
 
     expect_equal(length(desc), 2)
 

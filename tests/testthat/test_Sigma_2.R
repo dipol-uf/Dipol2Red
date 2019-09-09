@@ -33,10 +33,10 @@ test_that("Executing [Sigma_2] on the test data", {
     pth <- system.file("tests", "legacy_descriptor.dat",
                     package = "Dipol2Red", mustWork = TRUE)
 
-    desc <- ReadLegacyDescriptor(pth)
+    desc <- read_legacy_descriptor(pth)
 
     data <- desc %>%
-        LoadFromLegacyDescriptor(
+        load_from_legacy_descriptor(
             root = system.file(
                 "tests",
                 package = "Dipol2Red",
@@ -45,7 +45,7 @@ test_that("Executing [Sigma_2] on the test data", {
     bandInfo <- get(data("BandInfo", package = "Dipol2Red"))
 
     result <- map2_dfr(data, desc,
-        ~ Sigma_2(
+        ~ sigma_2(
             data = .x,
             filter = dplyr::filter(bandInfo, ID == .y$Filter)$Filter,
             bandInfo = bandInfo))
@@ -68,10 +68,10 @@ test_that("[Sigma_2] handles column names", {
     bandInfo <- get(data("BandInfo", package = "Dipol2Red")) %>%
         filter(Filter == "V")
 
-    expect_error(Sigma_2(data2, "V", bandInfo), "object 'JD' not found")
+    expect_error(sigma_2(data2, "V", bandInfo), "object 'JD' not found")
 
-   walk2(Sigma_2(data2, "V", bandInfo, date = NotJD, obs = Obs1234),
-        Sigma_2(data2, "V", bandInfo, date = !!sym("NotJD"), obs = !!sym("Obs1234")),
+   walk2(sigma_2(data2, "V", bandInfo, date = NotJD, obs = Obs1234),
+        sigma_2(data2, "V", bandInfo, date = !!sym("NotJD"), obs = !!sym("Obs1234")),
         expect_equal)
 
 

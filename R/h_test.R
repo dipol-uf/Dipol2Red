@@ -35,7 +35,7 @@ utils::globalVariables(c("n1", "n2"))
 #' @param n Number of observations column name
 #' @importFrom assertthat assert_that
 #' @importFrom rlang ensym !! flatten_dbl as_double
-#' @importFrom vctrs vec_c %<-%
+#' @importFrom vctrs vec_c %<-% vec_size
 #' @importFrom dplyr %>% select slice 
 #' @importFrom tibble tibble is_tibble
 #' @importFrom stats pf
@@ -45,7 +45,7 @@ utils::globalVariables(c("n1", "n2"))
 h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
 
     assert_that(is_tibble(data))
-    assert_that(nrow(data) == 2L)
+    assert_that(vec_size(data) == 2L)
 
     p_x <- ensym(p_x)
     p_y <- ensym(p_y)
@@ -68,9 +68,9 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
 
     I_S <- solve(S)
 
-    XY <- as_double(mean1 - mean2)
+    XY <- mean1 - mean2
 
-    T2 <- (n1 * n2 * t(XY) %*% I_S %*% (XY) / (n1 + n2)) %>% as_double
+    T2 <- n1 * n2 * dot_prod(t(XY), I_S %*% (XY)) / (n1 + n2)
     f <- (n1 + n2 - 1 - k) * T2 / ((n1 + n2 - 2) * k)
     d1 <- k
     d2 <- n1 + n2 - 1L - k
@@ -79,17 +79,10 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
     p_inv <- pf(f, d1, d2, lower.tail = FALSE)
     lgp <- pf(f, d1, d2, log.p = TRUE) / log(10)
     lgp_inv <- pf(f, d1, d2, lower.tail = FALSE, log.p = TRUE) / log(10)
-    #beta <- d1 * f / (d1 * f + d2)
-    #p0 <- (1 - beta) ^ (d2 / 2)
-    #p1 <- pbeta(1 - beta, d2 / 2, d1 / 2)
-    #p2 <- 1 - pbeta(beta, d1 / 2, d2 / 2)
     return(tibble("T^2" = T2, "f" = f,
         "p" = p, "1-p" = p_inv,
         "lg(p)" = lgp,
         "lg(1-p)" = lgp_inv,
         "d1" = d1, "d2" = d2, "n" = n1 + n2))
-    #"beta" = beta,
-    #"p0" = p0, "p1" = p1, "d1" = d1, "d2" = d2)
-
 }
 

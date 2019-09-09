@@ -43,6 +43,7 @@ utils::globalVariables(vctrs::vec_c(
 #' @param obs Name of the observations column. Supports \code{rlang}
 #' quasiquotiong.
 #' @export
+#' @aliases sigma_2
 #' @importFrom dplyr %>% pull mutate group_by summarise if_else n select
 #' @importFrom dplyr transmute group_map is_grouped_df bind_cols bind_rows
 #' @importFrom magrittr %<>% extract extract2 subtract
@@ -92,6 +93,9 @@ Sigma_2 <- function(data,
 
     return (result)
 }
+
+#' @export
+sigma_2 <- Sigma_2
 
 assertthat::on_failure(is_tibble) <- function(call, env) paste0("`", deparse(call[[2]]), "` is not a tibble")
 

@@ -2,6 +2,7 @@
 % Please edit documentation in R/ReadLegacyDescriptor.R
 \name{ReadLegacyDescriptor}
 \alias{ReadLegacyDescriptor}
+\alias{read_legacy_descriptor}
 \title{ReadLegacyDescriptor}
 \usage{
 ReadLegacyDescriptor(path)

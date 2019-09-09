@@ -23,25 +23,37 @@
 #   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 #   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+utils::globalVariables("Obj")
+
 #' @title LoadFromLegacyDescriptor
 #' @param desc Descriptors as output from \code{ReadLegacyDescriptor}.
 #' @param root Root for the files in the descriptor.
+#' @aliases load_from_legacy_descriptor
 #' @export
 #' @importFrom purrr %>% map map_if walk2
 #' @importFrom rlang set_names
 #' @importFrom readr read_csv cols
+#' @importFrom glue glue
+#' @importFrom vctrs vec_c vec_size
+#' @importFrom fs path
+#' @importFrom stringr str_match
+#' @importFrom dplyr rename
 LoadFromLegacyDescriptor <- function(desc, root = ".") {
     data <- desc %>%
         map(extract2, "File") %>%
-        map_if(~nzchar(root), ~ file.path(root, .x)) %>%
-        map(~read_csv(.x, col_types = cols())) %>%
-        map(set_names, c("JD", "Ref", "Obs"))
+        map_if(~nzchar(root), ~ fs::path(root, .x)) %>%
+        map(read_csv, col_types = cols()) %>%
+        map(~set_names(.x, str_match(names(.x), "JD|Ref|Obj"))) %>%
+        map(rename, Obs = Obj)
 
     walk2(data, desc, function(obs, des) {
-            if (nrow(obs) != des$Count)
+            if (vec_size(obs) != des$Count)
                 warning(glue("Read number of observations ({nrow(obs)}) ",
                     "does not match expected number ({des$Count})."))
             })
 
     return(data)
 }
+
+#' @export
+load_from_legacy_descriptor <- LoadFromLegacyDescriptor
