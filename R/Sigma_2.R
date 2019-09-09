@@ -78,7 +78,7 @@ Sigma_2 <- function(data,
     bandInfo %<>% filter(Filter == filter)
 
     p0 <- bandInfo %>% extract(1L, vec_c("Px", "Py")) %>% flatten_dbl
-    a0 <- bandInfo %>% extract2(1L, "Angle") 
+    a0 <- bandInfo %>% slice(1) %>% pull(Angle)
 
     if (is_grouped_df(data))
         result <- data %>%
@@ -129,7 +129,7 @@ do_work_sigma2 <- function(data, date, obs, p0, a0,
 
     std <- 0
     delta <- 1e100
-
+    
     trnsfData <- data %>%
         transmute(JD = !!date, Q = 10 ^ (0.4 * !!obs)) %>%
         mutate(Id = (1L:n() - 1L) %/% nObsPerMes + 1L) %>%
@@ -193,6 +193,7 @@ do_work_sigma2 <- function(data, date, obs, p0, a0,
                         ((mean(pxMean) - result$Px) ^ 2 +
                         (mean(pyMean) - result$Py) ^ 2) /
                         (vec_size(pxMean) + vec_size(pyMean)))
+            
 
             pxMean <- vec_recycle(result$Px, vec_size(pxMean))
             pyMean <- vec_recycle(result$Py, vec_size(pyMean))
