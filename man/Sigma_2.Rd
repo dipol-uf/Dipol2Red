@@ -5,7 +5,7 @@
 \alias{sigma_2}
 \title{Sigma_2}
 \usage{
-Sigma_2(data, filter = "B", bandInfo = NULL,
+Sigma_2(data, filter = "B", bandInfo = NULL, ...,
   eqtrialCorrFactor = 0.034907, ittMax = 500L, eps = 1e-16,
   date = JD, obs = Obs)
 }
@@ -16,6 +16,8 @@ Sigma_2(data, filter = "B", bandInfo = NULL,
 
 \item{bandInfo}{A \code{tibble} containing
 filter descriptions.}
+
+\item{...}{Extra variables that should be preserved. Method preserves first element of the column}
 
 \item{eqtrialCorrFactor}{Equatorial correction for the angle.}
 

@@ -40,7 +40,8 @@ test_that("Executing [Sigma_2] on the test data", {
             root = system.file(
                 "tests",
                 package = "Dipol2Red",
-                mustWork = TRUE))
+                mustWork = TRUE)) %>%
+                map(~mutate(.x, Test = 1:n()))
 
     bandInfo <- get(data("BandInfo", package = "Dipol2Red"))
 

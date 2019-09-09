@@ -34,6 +34,7 @@ utils::globalVariables(vctrs::vec_c(
 #' @param filter Filter name.
 #' @param bandInfo A \code{tibble} containing
 #' filter descriptions.
+#' @param ... Extra variables that should be preserved. Method preserves first element of the column
 #' @param eqtrialCorrFactor Equatorial correction for the angle.
 #' @param ittMax Maximum iterations to perform.
 #' @param eps Tolerance. If average difference between previous and current step
@@ -44,15 +45,17 @@ utils::globalVariables(vctrs::vec_c(
 #' quasiquotiong.
 #' @export
 #' @aliases sigma_2
-#' @importFrom dplyr %>% pull mutate group_by summarise if_else n select
-#' @importFrom dplyr transmute group_map is_grouped_df bind_cols bind_rows
+#' @importFrom dplyr %>% pull mutate group_by summarise if_else n select tbl_vars
+#' @importFrom dplyr transmute group_map is_grouped_df bind_cols bind_rows one_of
 #' @importFrom magrittr %<>% extract extract2 subtract
-#' @importFrom rlang enquo !! is_null flatten_dbl as_function
+#' @importFrom rlang enquo !! is_null flatten_dbl as_function enquos is_empty is_character syms quo
 #' @importFrom assertthat assert_that on_failure is.string is.number is.count on_failure<-
 #' @importFrom vctrs vec_c vec_cast_common vec_size vec_recycle
+#' @importFrom tidyselect vars_select
 Sigma_2 <- function(data,
                         filter = "B",
                         bandInfo = NULL,
+                        ...,
                         eqtrialCorrFactor = 0.034907,
                         ittMax = 500L,
                         eps = 1e-16,
@@ -60,6 +63,9 @@ Sigma_2 <- function(data,
                         obs = Obs) {
     date <- enquo(date)
     obs <- enquo(obs)
+
+    extra_vars <- tidyselect::vars_select(dplyr::tbl_vars(data), !!!enquos(...))
+    
 
     assert_that(is_tibble(data))
     assert_that(is.string(filter))
@@ -83,13 +89,13 @@ Sigma_2 <- function(data,
     if (is_grouped_df(data))
         result <- data %>%
             group_map(
-                ~do_work_sigma2(.x, !!date, !!obs, p0, a0, eqtrialCorrFactor, ittMax, eps) %>%
-                    select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt) %>%
+                ~do_work_sigma2(.x, !!date, !!obs, p0, a0, eqtrialCorrFactor, ittMax, eps, extra_vars = extra_vars) %>%
+                    select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt, one_of(extra_vars)) %>%
                     bind_cols(.y)) %>%
             bind_rows
     else
-        result <- do_work_sigma2(data, !!date, !!obs, p0, a0, eqtrialCorrFactor, ittMax, eps) %>%
-               select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt)
+        result <- do_work_sigma2(data, !!date, !!obs, p0, a0, eqtrialCorrFactor, ittMax, eps, extra_vars = extra_vars) %>%
+               select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt, one_of(extra_vars))
 
     return (result)
 }
@@ -109,11 +115,12 @@ do_work_sigma2 <- function(data, date, obs, p0, a0,
                             eqtrialCorrFactor,
                             ittMax, eps,
                             get_px = ~100.0 * (.x[1] - .x[3]),
-                            get_py = ~100.0 * (.x[2] - .x[4])) {
+                            get_py = ~100.0 * (.x[2] - .x[4]),
+                            extra_vars = NULL) {
 
     date <- enquo(date)
     obs <- enquo(obs)
-
+    
     get_px <- as_function(get_px)
     get_py <- as_function(get_py)
 
@@ -129,21 +136,26 @@ do_work_sigma2 <- function(data, date, obs, p0, a0,
 
     std <- 0
     delta <- 1e100
-    
+
+    summ_expr <- list(mJD = quo(mean(JD)), sQ = quo(sum(Q)), PX = quo(get_px(Q) / sQ), PY = quo(get_py(Q) / sQ))
+    if (!is_empty(extra_vars) && is_character(extra_vars)) {
+        preserve_vars <- extra_vars %>% set_names(.) %>% map(~quo((!!sym(.x))[1]))
+    }
+    else
+        preserve_vars <- NULL
+
     trnsfData <- data %>%
-        transmute(JD = !!date, Q = 10 ^ (0.4 * !!obs)) %>%
+        mutate(JD = !!date, Q = 10 ^ (0.4 * !!obs)) %>%
         mutate(Id = (1L:n() - 1L) %/% nObsPerMes + 1L) %>%
         group_by(Id)
 
     prepData <- trnsfData %>%
-        summarise(mJD = mean(JD), sQ = sum(Q),
-                  PX = get_px(Q) / sQ,
-                  PY = get_py(Q) / sQ) %>%
+        summarise(!!!summ_expr, !!!preserve_vars) %>%
         mutate(PX = PX - p0[1], PY = PY - p0[2])
 
     if (vec_size(prepData) == 1L) {
         result <- prepData %>%
-            transmute(JD = mJD, Px = PX, Py = PY) %>%
+            rename(JD = mJD, Px = PX, Py = PY) %>%
             mutate(SG = 0, SG_A = 0, Cov = 0, N = 1L, Ratio = 0, Itt = 1L) %>%
             mutate(
                 P = sqrt(Px ^ 2L + Py ^ 2L),
@@ -186,8 +198,8 @@ do_work_sigma2 <- function(data, date, obs, p0, a0,
                     Q = list(generate_Q(PX, PY, WX, WY, Px, Py)),
                     STD = SG * sqrt((sum(WX) + sum(WY)) / 2),
                     Ratio = 0.5 * NW / nrow(.),
-                    N = n(),
-                    Itt = i)
+                    N = n(), Itt = i,
+                    !!!preserve_vars)
 
             delta <- sqrt(
                         ((mean(pxMean) - result$Px) ^ 2 +

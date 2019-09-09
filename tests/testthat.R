@@ -28,9 +28,9 @@ library(testthat)
 if (interactive()) {
     library(assertthat)
     library(vctrs)
-    library(tidyverse)
+    #library(tidyverse)
     library(magrittr)
-    
+    extract <- magrittr::extract
     testthat::test_dir(fs::path("tests", "testthat"))
 } else{
     library(Dipol2Red)
