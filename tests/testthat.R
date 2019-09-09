@@ -27,6 +27,10 @@
 library(testthat)
 if (interactive()) {
     library(assertthat)
+    library(vctrs)
+    library(tidyverse)
+    library(magrittr)
+    
     testthat::test_dir(fs::path("tests", "testthat"))
 } else{
     library(Dipol2Red)
