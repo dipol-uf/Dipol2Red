@@ -23,28 +23,27 @@
 #   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 #   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-utils::globalVariables("Obj")
+utils::globalVariables(vctrs::vec_c("Obj", "Name", "Src", "Result"))
 
 #' @title LoadFromLegacyDescriptor
 #' @param desc Descriptors as output from \code{ReadLegacyDescriptor}.
 #' @param root Root for the files in the descriptor.
 #' @aliases load_from_legacy_descriptor
 #' @export
-#' @importFrom purrr %>% map map_if walk2
+#' @importFrom purrr %>% map map_if walk2 map2_chr
 #' @importFrom rlang set_names
 #' @importFrom readr read_csv cols
 #' @importFrom glue glue
 #' @importFrom vctrs vec_c vec_size
 #' @importFrom fs path
 #' @importFrom stringr str_match
-#' @importFrom dplyr rename
+#' @importFrom dplyr rename mutate if_else pull as_tibble
 LoadFromLegacyDescriptor <- function(desc, root = ".") {
     data <- desc %>%
         map(extract2, "File") %>%
         map_if(~nzchar(root), ~ fs::path(root, .x)) %>%
         map(read_csv, col_types = cols()) %>%
-        map(~set_names(.x, str_match(names(.x), "JD|Ref|Obj"))) %>%
-        map(rename, Obs = Obj)
+        map(~set_names(.x, fix_names(names(.x))))
 
     walk2(data, desc, function(obs, des) {
             if (vec_size(obs) != des$Count)
@@ -53,6 +52,18 @@ LoadFromLegacyDescriptor <- function(desc, root = ".") {
             })
 
     return(data)
+}
+
+fix_names <- function(text) {
+    text %>%
+        str_match("(JD|Ref|Obj)(\\d*)") %>%
+        as_tibble(.name_repair = ~vec_c("Match", "Name", "Id")) %>%
+        mutate(
+            Src = text,
+            Id = if_else(nzchar(Id) & !is.na(Id), glue("_{Id}"), glue("")),
+            Name = if_else(is.na(Name), Src, Name)) %>%
+        mutate(Result = map2_chr(Name, Id, paste0)) %>%
+        pull(Result)
 }
 
 #' @export

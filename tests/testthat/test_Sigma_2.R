@@ -49,7 +49,7 @@ test_that("Executing [Sigma_2] on the test data", {
         ~ sigma_2(
             data = .x,
             filter = dplyr::filter(bandInfo, ID == .y$Filter)$Filter,
-            bandInfo = bandInfo))
+            bandInfo = bandInfo, obs = Obj_1))
 
     expect_equal(nrow(result), 2)
     expect_equal(result$JD, c(2458196.12, 2458222.10), tolerance = 1e-2)
