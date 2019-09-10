@@ -3,6 +3,7 @@
 export(LoadFromLegacyDescriptor)
 export(ReadLegacyDescriptor)
 export(Sigma_2)
+export(fix_names)
 export(generate_Q)
 export(h_test)
 export(load_from_legacy_descriptor)

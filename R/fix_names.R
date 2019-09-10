@@ -1,6 +1,6 @@
 #   MIT License
 #
-#   Copyright(c) 2018
+#   Copyright(c) 2019
 #   Ilia Kosenkov [ilia.kosenkov.at.gm@gmail.com],
 #   Vilppu Piirola
 #
@@ -25,35 +25,17 @@
 
 utils::globalVariables(vctrs::vec_c("Obj", "Name", "Src", "Result"))
 
-#' @title LoadFromLegacyDescriptor
-#' @param desc Descriptors as output from \code{ReadLegacyDescriptor}.
-#' @param root Root for the files in the descriptor.
-#' @aliases load_from_legacy_descriptor
-#' @export
-#' @importFrom purrr %>% map map_if walk2 map2_chr
-#' @importFrom rlang set_names
-#' @importFrom readr read_csv cols
+#' @title fix_names
+#'
+#' @param text Names of the CSV file to replace
+#'
+#' @return R-compatible names suitable for further work
+#' @export 
+#' @importFrom dplyr %>% as_tibble mutate if_else pull
 #' @importFrom glue glue
-#' @importFrom vctrs vec_c vec_size
-#' @importFrom fs path
 #' @importFrom stringr str_match
-#' @importFrom dplyr rename mutate if_else pull as_tibble
-LoadFromLegacyDescriptor <- function(desc, root = ".") {
-    data <- desc %>%
-        map(extract2, "File") %>%
-        map_if(~nzchar(root), ~ fs::path(root, .x)) %>%
-        map(read_csv, col_types = cols()) %>%
-        map(~set_names(.x, fix_names(names(.x))))
-
-    walk2(data, desc, function(obs, des) {
-            if (vec_size(obs) != des$Count)
-                warning(glue("Read number of observations ({nrow(obs)}) ",
-                    "does not match expected number ({des$Count})."))
-            })
-
-    return(data)
-}
-
+#' @importFrom vctrs vec_c
+#' @importFrom purrr map2_chr
 fix_names <- function(text) {
     text %>%
         str_match("(JD|Ref|Obj)(\\d*)") %>%
@@ -65,6 +47,3 @@ fix_names <- function(text) {
         mutate(Result = map2_chr(Name, Id, paste0)) %>%
         pull(Result)
 }
-
-#' @export
-load_from_legacy_descriptor <- LoadFromLegacyDescriptor
