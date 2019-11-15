@@ -34,39 +34,41 @@ if (interactive()) {
 } else {
 
     message("Running `roxygen2::roxygenize`...")
-    roxygen2::roxygenize()
+    roxygen2::roxygenize(".")
+    message("Finished `roxygen2::roxygenize`...")
 
-    isWin <- grepl("win(dows)?", Sys.info()["sysname"])
-    if (is.na(isWin))
+    is_win <- grepl("win(dows)?", Sys.info()["sysname"])
+    if (is.na(is_win))
         stop("Unable to detect system. Run `R CMD build` manually.")
-    sfx <- ifelse(isWin, ".exe", "")
+    sfx <- ifelse(is_win, ".exe", "")
     cmd_1 <- sprintf("R%s CMD build .", sfx)
 
     message(paste("Executing:", cmd_1))
-    if (isWin)
-        shell(cmd_1, mustWork = TRUE)
+    if (is_win)
+        shell(cmd_1, must_wrok = TRUE)
     else
         system(cmd_1)
 
-    pckgs <- base::dir(".", "*.gz")
+    pckgs <- fs::dir_ls(".", glob = "*.gz")
 
     `%>%` <- dplyr::`%>%`
-    stringr::str_match_all(pckgs, "Dipol2Red_(([0-9]\\.){3}).*gz") %>%
-        purrr::map(dplyr::as_tibble) %>%
-        purrr::reduce(dplyr::bind_rows) %>%
-        dplyr::select(1:2) %>%
-        stats::setNames(nm = c("File", "Version")) %>%
-        dplyr::arrange(desc(Version)) %>%
+
+    stringr::str_match(pckgs, "^.*_((?:[0-9]+?\\.?){3})\\.tar\\.gz$") %>%
+        dplyr::as_tibble(.name_repair = ~c("File", "Version")) %>%
+        dplyr::mutate(
+            VersionNum = stringr::str_split(Version, "\\."),
+            Major = purrr::map_int(VersionNum, ~ readr::parse_integer(.x[1])),
+            Minor = purrr::map_int(VersionNum, ~ readr::parse_integer(.x[2])),
+            Patch = purrr::map_int(VersionNum, ~ readr::parse_integer(.x[3]))) %>%
+        dplyr::arrange(desc(Major), desc(Minor), desc(Patch)) %>%
         dplyr::slice(1) %>%
-        dplyr::pull(File) -> latestPckg
+        dplyr::pull(File) -> latest_pckg
 
 
-
-    cmd_2 <- sprintf("R%s CMD check %s", sfx, latestPckg)
-
+    cmd_2 <- sprintf("R%s CMD check %s", sfx, latest_pckg)
     message(paste("Executing:", cmd_2))
-    if (isWin)
-        shell(cmd_2, mustWork = TRUE)
+    if (is_win)
+        shell(cmd_2, must_wrok = TRUE)
     else
         system(cmd_2)
 }
