@@ -2,7 +2,6 @@
 #
 #   Copyright(c) 2018
 #   Ilia Kosenkov [ilia.kosenkov.at.gm@gmail.com],
-#   Vilppu Piirola
 #
 #   Permission is hereby granted, free of charge, to any person obtaining a copy
 #   of this software and associated documentation files(the "Software"), to deal
@@ -30,6 +29,11 @@ if (interactive()) {
     library(tidyverse)
     library(magrittr)
     library(rlang)
+    library(vctrs)
+    library(glue)
+    library(assertthat)
+
+    purrr::walk(fs::dir_ls("R", glob = "*R"), source)
     
 } else {
 

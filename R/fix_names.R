@@ -2,7 +2,6 @@
 #
 #   Copyright(c) 2019
 #   Ilia Kosenkov [ilia.kosenkov.at.gm@gmail.com],
-#   Vilppu Piirola
 #
 #   Permission is hereby granted, free of charge, to any person obtaining a copy
 #   of this software and associated documentation files(the "Software"), to deal
@@ -26,24 +25,49 @@
 utils::globalVariables(vctrs::vec_c("Obj", "Name", "Src", "Result"))
 
 #' @title fix_names
-#'
-#' @param text Names of the CSV file to replace
+#' @rdname fix_names
+#' @param x Names of the CSV file to replace
 #'
 #' @return R-compatible names suitable for further work
-#' @export 
+#' @export
 #' @importFrom dplyr %>% as_tibble mutate if_else pull
 #' @importFrom glue glue
 #' @importFrom stringr str_match
-#' @importFrom vctrs vec_c
-#' @importFrom purrr map2_chr
-fix_names <- function(text) {
-    text %>%
-        str_match("(JD|Ref|Obj)(\\d*)") %>%
+#' @importFrom vctrs vec_c vec_in
+fix_names <- function(x) {
+    UseMethod("fix_names")
+}
+
+#' @rdname fix_names
+#' @export
+fix_names.character <- function(x) {
+    x %>%
+        str_match(regex("(jd|mjd|date|filter|ref|obj)(\\d+)?", ignore_case = TRUE)) %>%
         as_tibble(.name_repair = ~vec_c("Match", "Name", "Id")) %>%
         mutate(
-            Src = text,
-            Id = if_else(nzchar(Id) & !is.na(Id), glue("_{Id}"), glue("")),
-            Name = if_else(is.na(Name), Src, Name)) %>%
-        mutate(Result = map2_chr(Name, Id, paste0)) %>%
+            Name = tolower(Name),
+            Src = x,
+            Id = if_else(nzchar(Id) & !is.na(Id), glue("_{Id}"), glue(""))) %>%
+        mutate(
+            Name = case_when(
+                vec_in(Name, vec_c("jd", "date", "mjd")) ~ "JD",
+                Name == "obj" ~ "Obj",
+                Name == "ref" ~ "Ref",
+                Name == "filter" ~ "Filter",
+                TRUE ~ Src)) %>%
+        mutate(Result = paste0(Name, Id)) %>%
         pull(Result)
 }
+
+#' @rdname fix_names
+#' @export
+fix_names.tbl_df <- function(x)
+    set_names(x, fix_names(names(x)))
+
+#' @rdname fix_names
+#' @export
+fix_names.data.frame <- function(x)
+    set_names(x, fix_names(names(x)))
+
+fix_names.default <- function(x)
+    rlang::abort("Cannot fix names. Object type is not supported.", "Dipol2Red_type_mismatch")
