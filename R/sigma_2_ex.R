@@ -55,7 +55,7 @@ do_work_sigma_2_ex <- function(data, date_col, obs_col,
                             eqtrialCorrFactor,
                             ittMax, eps,
                             extra_vars = NULL) {
-    .Call("d2r_do_work_sigma_2_ex", data, date_col, obs_col, what = 1:16)
+    .Call("d2r_do_work_sigma_2_ex", data, date_col, obs_col, what = vec_seq_along(data), extra_vars = extra_vars)
 }
 
 
