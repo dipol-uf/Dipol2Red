@@ -97,16 +97,16 @@ process_files <- function(path, default_filter = "B", by = 4L)
 }
 
 
-print_processed_files <- function(inputs) {
-    sigfig <- options("pillar.sigfig")
-    n_max <- options("tibble.print_max")
+#print_processed_files <- function(inputs) {
+    #sigfig <- options("pillar.sigfig")
+    #n_max <- options("tibble.print_max")
 
-    options(pillar.sigfig = 9, tibble.print_max = Inf)
+    #options(pillar.sigfig = 9, tibble.print_max = Inf)
 
-    print(inputs)
-    #map(inputs, map, ~ print(.x, n = vec_size(.x), width = 115))
+    #print(inputs)
+    ##map(inputs, map, ~ print(.x, n = vec_size(.x), width = 115))
 
-    options(pillar.sigfig = sigfig, tibble.print_max = n_max)
+    #options(pillar.sigfig = sigfig, tibble.print_max = n_max)
 
-    return(invisible(inputs))
-}
+    #return(invisible(inputs))
+#}

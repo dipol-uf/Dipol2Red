@@ -1,6 +1,6 @@
 #   MIT License
 #
-#   Copyright(c) 2018
+#   Copyright(c) 2018-2019
 #   Ilia Kosenkov [ilia.kosenkov.at.gm@gmail.com],
 #   Vilppu Piirola
 #
@@ -29,7 +29,8 @@ utils::globalVariables(vctrs::vec_c(
                        "mJD", "Px", "Py", "SGx", "SGy", "SG", "P",
                        "NW", "A", "STD", "SG_A", "Cov", "N", "Ratio",
                        "Itt", "Angle", ".x", "BandInfo"))
-#' @title Sigma_2
+#' @title sigma_2
+#' @rdname sigma_2
 #' @param data Input data in form of a \code{tibble}.
 #' @param filter Filter name.
 #' @param bandInfo A \code{tibble} containing
@@ -52,7 +53,7 @@ utils::globalVariables(vctrs::vec_c(
 #' @importFrom assertthat assert_that on_failure is.string is.number is.count on_failure<-
 #' @importFrom vctrs vec_c vec_cast_common vec_size vec_recycle
 #' @importFrom tidyselect vars_select
-Sigma_2 <- function(data,
+sigma_2 <- function(data,
                         filter = "B",
                         bandInfo = NULL,
                         ...,
@@ -89,19 +90,20 @@ Sigma_2 <- function(data,
     if (is_grouped_df(data))
         result <- data %>%
             group_map(
-                ~do_work_sigma2(.x, !!date, !!obs, p0, a0, eqtrialCorrFactor, ittMax, eps, extra_vars = extra_vars) %>%
+                ~do_work_sigma_2(.x, !!date, !!obs, p0, a0, eqtrialCorrFactor, ittMax, eps, extra_vars = extra_vars) %>%
                     select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt, one_of(extra_vars)) %>%
                     bind_cols(.y)) %>%
             bind_rows
     else
-        result <- do_work_sigma2(data, !!date, !!obs, p0, a0, eqtrialCorrFactor, ittMax, eps, extra_vars = extra_vars) %>%
+        result <- do_work_sigma_2(data, !!date, !!obs, p0, a0, eqtrialCorrFactor, ittMax, eps, extra_vars = extra_vars) %>%
                select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt, one_of(extra_vars))
 
     return (result)
 }
 
+#' @rdname sigma_2
 #' @export
-sigma_2 <- Sigma_2
+Sigma_2 <- sigma_2
 
 assertthat::on_failure(is_tibble) <- function(call, env) paste0("`", deparse(call[[2]]), "` is not a tibble")
 
@@ -111,7 +113,7 @@ dot_prod <- function(x, y) {
 }
 
 
-do_work_sigma2 <- function(data, date, obs, p0, a0,
+do_work_sigma_2 <- function(data, date, obs, p0, a0,
                             eqtrialCorrFactor,
                             ittMax, eps,
                             get_px = ~100.0 * (.x[1] - .x[3]),

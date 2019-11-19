@@ -1,8 +1,7 @@
 #   MIT License
 #
-#   Copyright(c) 2018
+#   Copyright(c) 2018-2019
 #   Ilia Kosenkov [ilia.kosenkov.at.gm@gmail.com],
-#   Vilppu Piirola
 #
 #   Permission is hereby granted, free of charge, to any person obtaining a copy
 #   of this software and associated documentation files(the "Software"), to deal
@@ -34,6 +33,10 @@ if (interactive()) {
     testthat::test_dir(fs::path("tests", "testthat"))
 } else{
     library(Dipol2Red)
-
+    library(dplyr)
+    library(purrr)
+    library(magrittr)
+    library(rlang)
+    library(readr)
     testthat::test_check("Dipol2Red", reporter = default_reporter())
 }
