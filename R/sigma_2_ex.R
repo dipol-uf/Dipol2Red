@@ -55,7 +55,7 @@ do_work_sigma_2_ex <- function(data, date_col, obs_col,
                             eqtrialCorrFactor,
                             ittMax, eps,
                             extra_vars = NULL) {
-    .Call("d2r_do_work_sigma_2_ex", data, date_col, obs_col, what = vec_seq_along(data), extra_vars = extra_vars)
+    .Call("d2r_do_work_sigma_2_ex", data, date_col, obs_col, what = 1L:16L + 32L, extra_vars = extra_vars)
 }
 
 
@@ -83,10 +83,10 @@ if (isNamespaceLoaded("rlang")) {
                 "tests",
                 package = "Dipol2Red",
                 mustWork = TRUE)) %>%
-                imap(~mutate(.x, Test = 1:n(), Type = as_factor(.y))) %>%
+                imap(~mutate(.x, Test = 1:n() - 1L, Type = as_factor(.y))) %>%
                 RLibs::vec_rbind_uq %>%
                 group_by(Type)
 
     compile_src()
-    sigma_2_ex(data, JD, Obj_1, Test) %>% print
+    sigma_2_ex(data, JD, Obj_1, Test, Type) %>% print
 }
