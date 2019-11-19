@@ -5,3 +5,7 @@
 **/*Rcheck/*
 **/*tar.gz
 **/CSVs/*
+
+**/*vcxproj*
+**/*dll
+**/*o
