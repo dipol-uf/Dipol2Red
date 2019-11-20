@@ -23,8 +23,17 @@ void mag_2_px_py(
 Rcpp::List extract_extra_cols(
 	const std::vector<std::string> &cols,
 	const Rcpp::DataFrame &data_frame,
-	const Rcpp::IntegerVector &idx);
+	const Rcpp::List &idx);
 
-double average_vector(const Rcpp::NumericVector &input);
+Rcpp::NumericVector average_arg(
+	const Rcpp::NumericVector &data,
+	const Rcpp::List &idx);
+
 
 void postprocess_pol(Rcpp::List &input);
+
+avg_result sigma_2(
+	const Rcpp::NumericVector &data,
+	const Rcpp::IntegerVector &range,
+	double eps_val,
+	int itt_max);

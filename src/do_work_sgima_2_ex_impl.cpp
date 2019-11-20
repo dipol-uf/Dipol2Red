@@ -32,45 +32,100 @@ SEXP d2r_do_work_sigma_2_ex(
 {
 	if (Rf_inherits(input, "data.frame") != TRUE)
 		forward_rcpp_exception_to_r(exception("`input` is of unsupported type."));
-	const auto data_frame = as<DataFrame>(input);
-	const auto x_col = as<std::string>(as<CharacterVector>(date_col)[0]);
-	const auto y_col = as<std::string>(as<CharacterVector>(obs_col)[0]);
-	const auto extra_cols = as<std::vector<std::string>>(extra_vars);
-	const auto eps_val = as<double>(eps);
-	const auto itt_max_val = as<int>(itt_max);
+	try {
+		const auto data_frame = as<DataFrame>(input);
+		const auto x_col = as<std::string>(as<CharacterVector>(date_col)[0]);
+		const auto y_col = as<std::string>(as<CharacterVector>(obs_col)[0]);
+		const auto extra_cols = as<std::vector<std::string>>(extra_vars);
+		const auto eps_val = as<double>(eps);
+		const auto itt_max_val = as<int>(itt_max);
 
-	const auto idx_t = as<List>(what);
-	const auto idx = as <IntegerVector>(idx_t[0]);
-	
-	if (idx.length() % batch_size != 0)
-		forward_rcpp_exception_to_r(exception("`what` should be divisible by 4."));
-	const size_t nrow = idx.length() / 4;
-	
+		const auto idx_t = as<List>(what);
+		const auto n_groups = idx_t.length();
+
+
+		const auto arg = as<NumericVector>(data_frame[x_col]);
+		const auto data = as<NumericVector>(data_frame[y_col]);
+
+		std::vector<double> px(n_groups);
+		std::vector<double> py(n_groups);
+		std::vector<double> sg(n_groups);
+		std::vector<int> itt(n_groups);
+		std::vector<int> n(n_groups);
+		std::vector<double> ratio(n_groups);
+		List q(n_groups);
+
+		for (auto i = 0; i < n_groups; i++)
+		{
+			const auto avg = sigma_2(data, as<IntegerVector>(idx_t[i]), eps_val, itt_max_val);
+			px[i] = std::get<0>(avg);
+			py[i] = std::get<1>(avg);
+			sg[i] = std::get<2>(avg);
+			itt[i] = std::get<3>(avg);
+			n[i] = std::get<4>(avg);
+			ratio[i] = std::get<5>(avg);
+
+			q[i] = NumericMatrix(2, 2, std::get<6>(avg).cbegin());
+		}
+
+		const auto cols = extract_extra_cols(extra_cols, data_frame, idx_t);
+
+
+		std::vector<std::string> names{ x_col, "Px", "Py", "SG", "P", "A", "SG_A", "Itt", "N", "Ratio", "Q" };
+		List result(names.size() + extra_cols.size());
+		names.reserve(result.length());
+
+		for (const auto &it : extra_cols)
+			names.push_back(it);
+		result.names() = names;
+
+		result[x_col] = average_arg(arg, idx_t);
+		result["Px"] = wrap(px);
+		result["Py"] = wrap(py);
+		result["SG"] = wrap(sg);
+		result["Itt"] = wrap(itt);
+		result["N"] = wrap(n);
+		result["Ratio"] = wrap(ratio);
+		result["Q"] = q;
+
+
+		for (const auto &it : extra_cols)
+			result[it] = cols[it];
+
+		postprocess_pol(result);
+
+		return result;
+	}
+	catch(std::exception &ex)
+	{
+		forward_exception_to_r(ex);
+	}
+	catch(...)
+	{
+		Rf_error("Unknown error");
+	}
+	return R_NilValue;
+}
+
+avg_result sigma_2(
+	const NumericVector &data,
+	const IntegerVector &range,
+	double eps_val,
+	int itt_max)
+{
+	if (range.length() % batch_size != 0)
+		throw std::logic_error("`what` should be divisible by 4.");
+
+	const size_t nrow = range.length() / 4;
+
 	std::vector<double> px(nrow);
 	std::vector<double> py(nrow);
 
-	const auto arg = as<NumericVector>(data_frame[x_col]);
-	const auto data = as<NumericVector>(data_frame[y_col]);
-	
-	mag_2_px_py(data, idx, px, py);
-	auto out_list = List();//extract_extra_cols(extra_cols, data_frame, idx);
+	mag_2_px_py(data, range, px, py);
 
-	const auto avg = nrow == 1
+	return nrow == 1
 		? average_single(px, py)
-		: average_multiple(px, py, eps_val, itt_max_val);
-	const NumericMatrix q_mat(2, 2, std::get<6>(avg).cbegin());
-	
-	out_list.push_back(List::create(q_mat), "Q");
-	out_list.push_back(wrap(std::get<5>(avg)), "Ratio");
-	out_list.push_back(wrap(std::get<4>(avg)), "N");
-	out_list.push_back(wrap(std::get<3>(avg)), "Itt");
-	out_list.push_back(wrap(std::get<2>(avg)), "SG");
-	out_list.push_back(wrap(std::get<1>(avg)), "Py");
-	out_list.push_back(wrap(std::get<0>(avg)), "Px");
-	
-	out_list.push_back(wrap(average_vector(arg)), "JD");
-	postprocess_pol(out_list);
-	return out_list;
+		: average_multiple(px, py, eps_val, itt_max);
 }
 
 void mag_2_px_py(
@@ -112,30 +167,24 @@ void mag_2_px_py(
 List extract_extra_cols(
 	const std::vector<std::string> &cols,
 	const DataFrame &data_frame,
-	const IntegerVector &idx)
+	const List &idx)
 {
 	if (cols.empty())
 		return List::create();
 
-	auto result = List::create();
+	IntegerVector id_v(idx.length());
+
+	for (auto i = 0; i < id_v.length(); i++)
+		id_v[i] = as<IntegerVector>(idx[i])[0];
+	
+	List result(cols.size());
 	const auto vec_slice = vctrs_provider::vec_slice();
 	
-	for (const auto& col : cols)
-		result.push_back(vec_slice(data_frame[col], idx[0]), col);
-
+	for (size_t i = 0; i < cols.size(); i++)
+		result[i] = vec_slice(data_frame[cols[i]], id_v);
+	result.names() = cols;
+	
 	return result;
-}
-
-double average_vector(const NumericVector &input)
-{
-	if (input.length() == 0)
-		return nan("");
-
-	long double sum = 0.0;
-	for (const auto &itt : input)
-		sum += itt;
-
-	return static_cast<double>(sum / input.length());
 }
 
 void postprocess_pol(List &input)
@@ -157,4 +206,22 @@ void postprocess_pol(List &input)
 	input["A"] = wrap(a);
 	input["P"] = wrap(p);
 	input["SG_A"] = wrap(sg_a);
+}
+
+NumericVector average_arg(
+	const NumericVector &data,
+	const List &idx)
+{
+	NumericVector result(idx.length());
+	for(auto i = 0; i < result.length(); i++)
+	{
+		auto avg = 0.0;
+		const auto vec = as<NumericVector>(idx[i]);
+		for(const auto &it : vec)
+			avg += data[it - 1];
+
+		result[i] = avg / vec.size();
+	}
+
+	return result;	
 }

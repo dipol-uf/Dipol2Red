@@ -26,16 +26,16 @@ sigma_2_ex <- function(data,
                         date_col = JD,
                         obs_col = Obs,
                         ...,
-                        eqtrialCorrFactor = 0.034907,
                         ittMax = 500L,
                         eps = 1e-16) {
 
-    extra_vars <- tidyselect::vars_select(dplyr::tbl_vars(data), !!!enquos(...))
+    assert_that(is_tibble(data) || is.data.frame(data))
+    assert_that(is.count(ittMax))
+    assert_that(is.number(eps), eps > 0)
 
-    #assert_that(is_tibble(data))
-    #assert_that(is.number(eqtrialCorrFactor))
-    #assert_that(is.count(ittMax))
-    #assert_that(is.number(eps), eps > 0)
+    extra_vars <- union(
+        group_vars(data),
+        tidyselect::vars_select(dplyr::tbl_vars(data), !!!enquos(...)))
 
 
     indices <- group_indices(data)
@@ -49,20 +49,6 @@ sigma_2_ex <- function(data,
                        extra_vars,
                        eps,
                        ittMax)
-
-    #data %>%
-        #group_split %>%
-        #map(~do_work_sigma_2_ex(
-                #.x,
-                #as_name(ensym(date_col)),
-                #as_name(ensym(obs_col)),
-                #1:vec_size(.x),
-                #extra_vars,
-                #eps,
-                #ittMax)) %>%
-        #{vec_rbind(!!!.) }
-                    #select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt, one_of(extra_vars))) %>%
-                        #bind_rows
 }
 
 
@@ -92,7 +78,7 @@ compile_src <- function() {
     dyn.load("src/dipol_2_red.dll", local = FALSE)
 }
 
-if (isNamespaceLoaded("rlang")) {
+#if (isNamespaceLoaded("rlang")) {
     pth <- system.file("tests", "legacy_descriptor.dat",
                     package = "Dipol2Red", mustWork = TRUE)
     desc <- read_legacy_descriptor(pth)
@@ -107,7 +93,12 @@ if (isNamespaceLoaded("rlang")) {
                 RLibs::vec_rbind_uq %>%
                 group_by(Type)
 
-    compile_src()
-    sigma_2_ex(data, JD, Obj_1, Test, Type) %>% print
-    sigma_2(data, filter = "B", bandInfo = NULL, obs = Obj_1) %>% print
-}
+    #compile_src()
+    #sigma_2_ex(data, JD, Obj_1, Test) %>% print
+    #sigma_2(data, filter = "B", bandInfo = NULL, obs = Obj_1) %>% print
+#}
+
+microbenchmark::microbenchmark(
+    cpp = sigma_2_ex(data, JD, Obj_1, Test),
+    r = sigma_2(data, filter = "B", bandInfo = BandInfo, obs = Obj_1, Test),
+    times = 20L) %>% print
