@@ -26,7 +26,9 @@ SEXP d2r_do_work_sigma_2_ex(
 	SEXP date_col,
 	SEXP obs_col,
 	SEXP what,
-	SEXP extra_vars)
+	SEXP extra_vars,
+	SEXP eps,
+	SEXP itt_max)
 {
 	if (Rf_inherits(input, "data.frame") != TRUE)
 		forward_rcpp_exception_to_r(exception("`input` is of unsupported type."));
@@ -35,7 +37,10 @@ SEXP d2r_do_work_sigma_2_ex(
 	const auto y_col = as<std::string>(as<CharacterVector>(obs_col)[0]);
 	const auto idx = as<IntegerVector>(what);
 	const auto extra_cols = as<std::vector<std::string>>(extra_vars);
+	const auto eps_val = as<double>(eps);
+	const auto itt_max_val = as<int>(itt_max);
 
+	
 	if (idx.length() % batch_size != 0)
 		forward_rcpp_exception_to_r(exception("`what` should be divisible by 4."));
 	const size_t nrow = idx.length() / 4;
@@ -47,26 +52,26 @@ SEXP d2r_do_work_sigma_2_ex(
 	const auto data = as<NumericVector>(data_frame[y_col]);
 	
 	mag_2_px_py(data, idx, px, py);
-	auto preserved_cols = extract_extra_cols(extra_cols, data_frame, idx);
+	auto out_list = extract_extra_cols(extra_cols, data_frame, idx);
 
 	const auto avg = nrow == 1
 		? average_single(px, py)
-		: average_multiple(px, py);
+		: average_multiple(px, py, eps_val, itt_max_val);
 
 	const auto q_vec = as<NumericVector>(avg["Q"]);
 	const NumericMatrix q_mat(2, 2, q_vec.cbegin());
 	
-	preserved_cols.push_back(List::create(q_mat), "Q");
-	preserved_cols.push_back(avg["Ratio"], "Ratio");
-	preserved_cols.push_back(avg["Itt"], "Itt");
-	preserved_cols.push_back(avg["SG"], "SG");
-	preserved_cols.push_back(avg["N"], "N");
-	preserved_cols.push_back(avg["Py"], "Py");
-	preserved_cols.push_back(avg["Px"], "Px");
+	out_list.push_back(List::create(q_mat), "Q");
+	out_list.push_back(avg["Ratio"], "Ratio");
+	out_list.push_back(avg["Itt"], "Itt");
+	out_list.push_back(avg["SG"], "SG");
+	out_list.push_back(avg["N"], "N");
+	out_list.push_back(avg["Py"], "Py");
+	out_list.push_back(avg["Px"], "Px");
 	
-	preserved_cols.push_back(wrap(average_vector(arg)), "JD");
-		
-	return preserved_cols;
+	out_list.push_back(wrap(average_vector(arg)), "JD");
+	postprocess_pol(out_list);
+	return out_list;
 }
 
 void mag_2_px_py(
@@ -154,11 +159,11 @@ List average_single(const std::vector<double> &px, const std::vector<double> &py
 
 List average_multiple(
 	const std::vector<double> &px, 
-	const std::vector<double> &py)
+	const std::vector<double> &py,
+	const double eps,
+	const int itt_max)
 {
-	const size_t itt_max = 100;
-	auto std = 1e-100;
-	const auto eps = 1e-6;
+	auto std = std_init;
 	
 	if (px.size() !=  py.size() )
 	{
@@ -178,7 +183,7 @@ List average_multiple(
 	auto mean_py = average(py);
 	auto sg = 0.0;
 	auto n_w = 0;
-	size_t i = 0;
+	auto i = 0;
 
 	for(; i < itt_max; i++)
 	{
@@ -239,4 +244,25 @@ List average_multiple(
 		_["N"] = wrap(static_cast<int>(size)),
 		_["Q"] = wrap(cov),
 		_["Ratio"] = wrap(0.5 * n_w / static_cast<int>(size)));
+}
+
+void postprocess_pol(List &input)
+{
+	const auto px = as<std::vector<double>>(input["Px"]);
+	const auto py = as<std::vector<double>>(input["Py"]);
+	const auto sg = as<std::vector<double>>(input["SG"]);
+
+	std::vector<double> a(px.size());
+	std::vector<double> p(px.size());
+	std::vector<double> sg_a(px.size());
+
+	for (size_t i = 0; i < px.size(); i++)
+	{
+		a[i] = fmod(90.0 / PI * atan2(py[i], px[i]), 180.0);
+		p[i] = sqrt(pow(px[i], 2) + pow(py[i], 2));
+		sg_a[i] = 90.0 / PI * atan2(sg[i], p[i]);
+	}
+	input["A"] = wrap(a);
+	input["P"] = wrap(p);
+	input["SG_A"] = wrap(sg_a);
 }

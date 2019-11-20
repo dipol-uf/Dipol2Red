@@ -36,11 +36,18 @@ sigma_2_ex <- function(data,
     #assert_that(is.number(eqtrialCorrFactor))
     #assert_that(is.count(ittMax))
     #assert_that(is.number(eps), eps > 0)
-
+    
     data %>%
         group_split %>%
-        map(do_work_sigma_2_ex, as.character(ensym(date_col)), as_name(ensym(obs_col)), eqtrialCorrFactor, ittMax, eps, extra_vars = extra_vars) %>%
-        map(as_tibble) %>% {vec_rbind(!!!.) }
+        map(~do_work_sigma_2_ex(
+                .x,
+                as_name(ensym(date_col)),
+                as_name(ensym(obs_col)),
+                1:vec_size(.x),
+                extra_vars,
+                eps,
+                ittMax)) %>%
+        {vec_rbind(!!!.) }
                     #select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt, one_of(extra_vars))) %>%
                         #bind_rows
     #else
@@ -52,10 +59,15 @@ sigma_2_ex <- function(data,
 
 
 do_work_sigma_2_ex <- function(data, date_col, obs_col,
-                            eqtrialCorrFactor,
-                            ittMax, eps,
-                            extra_vars = NULL) {
-    result <- .Call("d2r_do_work_sigma_2_ex", data, date_col, obs_col, what = 1L:vec_size(data), extra_vars = extra_vars)
+                            what,
+                            extra_vars = NULL,
+                            eps,
+                            ittMax) {
+    as_tibble(.Call("d2r_do_work_sigma_2_ex", data, date_col, obs_col,
+        what,
+        extra_vars,
+        eps,
+        ittMax))
 }
 
 
