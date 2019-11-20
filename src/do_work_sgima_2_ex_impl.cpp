@@ -34,10 +34,13 @@ SEXP d2r_do_work_sigma_2_ex(
 	const auto avg = nrow == 1
 		? average_single(px, py)
 		: average_multiple(px, py);
-		preserved_cols.push_back(avg["Wy"], "Wy");
-		preserved_cols.push_back(avg["Wx"], "Wx");
-		preserved_cols.push_back(avg["Py"], "Py");
-		preserved_cols.push_back(avg["Px"], "Px");
+
+	preserved_cols.push_back(avg["Ratio"], "Ratio");
+	preserved_cols.push_back(avg["Itt"], "Itt");
+	preserved_cols.push_back(avg["SG"], "SG");
+	preserved_cols.push_back(avg["N"], "N");
+	preserved_cols.push_back(avg["Py"], "Py");
+	preserved_cols.push_back(avg["Px"], "Px");
 	
 	preserved_cols.push_back(wrap(average_vector(arg)), "JD");
 		
@@ -119,8 +122,10 @@ List average_single(const std::vector<double> &px, const std::vector<double> &py
 	return List::create(
 		_["Px"] = wrap(px[0]),
 		_["Py"] = wrap(py[0]),
-		_["Wx"] = wrap(1.0),
-		_["Wy"] = wrap(1.0));
+		_["SG"] = wrap(0.0),
+		_["Itt"] = wrap(1),
+		_["N"] = wrap(1),
+		_["Ratio"] = wrap(0.0));
 }
 
 List average_multiple(
@@ -148,14 +153,15 @@ List average_multiple(
 	
 	auto mean_px = average(px);
 	auto mean_py = average(py);
+	auto sg = 0.0;
 	auto n_w = 0;
 	size_t i = 0;
 	for(; i < itt_max; i++)
 	{
-
 		abs_diff(px, mean_px, dx);
 		abs_diff(py, mean_py, dy);
 
+		n_w = 0.0;
 		for(size_t j = 0; j < size; j++)
 		{
 			if (dx[j] > 3 * std)
@@ -184,19 +190,18 @@ List average_multiple(
 			else
 				wy[j] = 1.0;
 		}
-
+		
 		const auto sum_wx = sum(wx);
 		const auto sum_wy = sum(wy);
 		const auto comp_px = dot_prod(wx, px) / sum_wx;
 		const auto comp_py = dot_prod(wy, py) / sum_wy;
 		const auto sg_x = weighted_sg(wx, px, comp_px, sum_wx);
 		const auto sg_y = weighted_sg(wy, py, comp_py, sum_wy);
-		const auto sg = sqrt((sg_x + sg_y) / (sum_wx + sum_wy - 2));
+		sg = sqrt((sg_x + sg_y) / (sum_wx + sum_wy - 2));
 		std = sg * sqrt((sum_wx + sum_wy) / 2);
 		delta = sqrt((pow(comp_px - mean_px, 2) + pow(comp_py - mean_py, 2)) / 2);
 		mean_px = comp_px;
 		mean_py = comp_py;
-		Rcout << std << "\t" << delta << "\t" << mean_px << "\t" << mean_py <<  std::endl;
 
 		if (delta <= eps)
 			break;
@@ -205,6 +210,8 @@ List average_multiple(
 	return List::create(
 		_["Px"] = wrap(mean_px),
 		_["Py"] = wrap(mean_py),
-		_["Wx"] = wrap(average(wx)),
-		_["Wy"] = wrap(average(wy)));
+		_["SG"] = wrap(sg),
+		_["Itt"] = wrap(i),
+		_["N"] = wrap(static_cast<int>(size)),
+		_["Ratio"] = wrap(0.5 * n_w / static_cast<int>(size)));
 }
