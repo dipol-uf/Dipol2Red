@@ -39,8 +39,8 @@ sigma_2_ex <- function(data,
 
     data %>%
         group_split %>%
-        map(do_work_sigma_2_ex, as.character(ensym(date_col)), as_name(ensym(obs_col)), eqtrialCorrFactor, ittMax, eps, extra_vars = extra_vars) #%>% { vec_rbind(!!!.) }
-        
+        map(do_work_sigma_2_ex, as.character(ensym(date_col)), as_name(ensym(obs_col)), eqtrialCorrFactor, ittMax, eps, extra_vars = extra_vars) %>%
+        map(as_tibble) %>% {vec_rbind(!!!.) }
                     #select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt, one_of(extra_vars))) %>%
                         #bind_rows
     #else
@@ -55,7 +55,7 @@ do_work_sigma_2_ex <- function(data, date_col, obs_col,
                             eqtrialCorrFactor,
                             ittMax, eps,
                             extra_vars = NULL) {
-    .Call("d2r_do_work_sigma_2_ex", data, date_col, obs_col, what = 1L:4L, extra_vars = extra_vars)
+    result <- .Call("d2r_do_work_sigma_2_ex", data, date_col, obs_col, what = 1L:vec_size(data), extra_vars = extra_vars)
 }
 
 
@@ -89,4 +89,5 @@ if (isNamespaceLoaded("rlang")) {
 
     compile_src()
     sigma_2_ex(data, JD, Obj_1, Test, Type) %>% print
+    sigma_2(data, filter = "B", bandInfo = NULL, obs = Obj_1) %>% print
 }

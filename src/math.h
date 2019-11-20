@@ -19,3 +19,11 @@ double weighted_sg(
 	const std::vector<double> &x,
 	double avg_x,
 	double sum_w);
+
+std::vector<double> make_cov(
+	const std::vector<double> &x,
+	const std::vector<double> &y,
+	const std::vector<double> &w_x,
+	const std::vector<double> &w_y,
+	double avg_x,
+	double avg_y);

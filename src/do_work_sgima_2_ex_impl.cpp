@@ -2,6 +2,24 @@
 
 using namespace Rcpp;
 
+template<typename T>
+void debug_print(const std::vector<T> &input)
+{
+	Rcout << "[ ";
+	for(size_t i = 0; i < input.size(); i++)
+	{
+		if (i != 0)
+		{
+			Rcout << ", ";
+			if (i % 10 == 0)
+				Rcout << std::endl;
+		}
+		Rcout << input[i];
+	}
+
+	Rcout << " ]" << std::endl << std::endl;
+}
+
 // [[Rcpp:export]]
 SEXP d2r_do_work_sigma_2_ex(
 	SEXP input,
@@ -28,13 +46,17 @@ SEXP d2r_do_work_sigma_2_ex(
 	const auto arg = as<NumericVector>(data_frame[x_col]);
 	const auto data = as<NumericVector>(data_frame[y_col]);
 	
-	mag_2_px_py(arg, data, idx, px, py);
+	mag_2_px_py(data, idx, px, py);
 	auto preserved_cols = extract_extra_cols(extra_cols, data_frame, idx);
 
 	const auto avg = nrow == 1
 		? average_single(px, py)
 		: average_multiple(px, py);
 
+	const auto q_vec = as<NumericVector>(avg["Q"]);
+	const NumericMatrix q_mat(2, 2, q_vec.cbegin());
+	
+	preserved_cols.push_back(List::create(q_mat), "Q");
 	preserved_cols.push_back(avg["Ratio"], "Ratio");
 	preserved_cols.push_back(avg["Itt"], "Itt");
 	preserved_cols.push_back(avg["SG"], "SG");
@@ -48,33 +70,34 @@ SEXP d2r_do_work_sigma_2_ex(
 }
 
 void mag_2_px_py(
-	const NumericVector &arg,
 	const NumericVector &data,
 	const IntegerVector &range,
 	std::vector<double> &px,
 	std::vector<double> &py)
 {
 	auto i = 0;
-	auto temp_px = 0.0;
-	auto temp_py = 0.0;
+	auto temp_px_1 = 0.0;
+	auto temp_px_2 = 0.0;
+	auto temp_py_1 = 0.0;
 	for (auto itt : range)
 	{
 		const auto rem = i % batch_size;
 		switch (rem)
 		{
 		case 0:
-			temp_px = pow(10.0, 0.4 * data[itt - 1]);
+			temp_px_1 = pow(10.0, 0.4 * data[itt - 1]);
 			break;
 		case 1:
-			temp_py = pow(10.0, 0.4 * data[itt - 1]);
+			temp_py_1 = pow(10.0, 0.4 * data[itt - 1]);
 			break;
 		case 2:
-			temp_px -= pow(10.0, 0.4 * data[itt - 1]);
-			px[i / batch_size] = 100.0 * temp_px;
+			temp_px_2 = pow(10.0, 0.4 * data[itt - 1]);
 			break;
 		default:
-			temp_py -= pow(10.0, 0.4 * data[itt - 1]);
-			py[i / batch_size] = 100.0 * temp_py;
+			const auto temp_py_2 = pow(10.0, 0.4 * data[itt - 1]);
+			const auto sum = temp_px_1 + temp_px_2 + temp_py_1 + temp_py_2;
+			px[i / batch_size] = 100.0 * (temp_px_1 - temp_px_2) / sum;
+			py[i / batch_size] = 100.0 * (temp_py_1 - temp_py_2) / sum;
 			break;
 		}
 		++i;
@@ -125,16 +148,16 @@ List average_single(const std::vector<double> &px, const std::vector<double> &py
 		_["SG"] = wrap(0.0),
 		_["Itt"] = wrap(1),
 		_["N"] = wrap(1),
-		_["Ratio"] = wrap(0.0));
+		_["Ratio"] = wrap(0.0),
+		_["Q"] = NumericVector(4, 0.0));
 }
 
 List average_multiple(
 	const std::vector<double> &px, 
 	const std::vector<double> &py)
 {
-	const size_t itt_max = 15;
-	auto std = 1e100;
-	auto delta = 1e100;
+	const size_t itt_max = 100;
+	auto std = 1e-100;
 	const auto eps = 1e-6;
 	
 	if (px.size() !=  py.size() )
@@ -156,6 +179,7 @@ List average_multiple(
 	auto sg = 0.0;
 	auto n_w = 0;
 	size_t i = 0;
+
 	for(; i < itt_max; i++)
 	{
 		abs_diff(px, mean_px, dx);
@@ -199,19 +223,20 @@ List average_multiple(
 		const auto sg_y = weighted_sg(wy, py, comp_py, sum_wy);
 		sg = sqrt((sg_x + sg_y) / (sum_wx + sum_wy - 2));
 		std = sg * sqrt((sum_wx + sum_wy) / 2);
-		delta = sqrt((pow(comp_px - mean_px, 2) + pow(comp_py - mean_py, 2)) / 2);
+		const auto delta = sqrt((pow(comp_px - mean_px, 2) + pow(comp_py - mean_py, 2)) / 2);
 		mean_px = comp_px;
 		mean_py = comp_py;
-
 		if (delta <= eps)
 			break;
 	}
-	
+
+	const auto cov = make_cov(px, py, wx, wy, mean_px, mean_py);
 	return List::create(
 		_["Px"] = wrap(mean_px),
 		_["Py"] = wrap(mean_py),
 		_["SG"] = wrap(sg),
 		_["Itt"] = wrap(i),
 		_["N"] = wrap(static_cast<int>(size)),
+		_["Q"] = wrap(cov),
 		_["Ratio"] = wrap(0.5 * n_w / static_cast<int>(size)));
 }

@@ -11,7 +11,6 @@ RcppExport SEXP d2r_do_work_sigma_2_ex(
 	SEXP extra_vars);
 
 void mag_2_px_py(
-	const Rcpp::NumericVector &arg,
 	const Rcpp::NumericVector &data,
 	const Rcpp::IntegerVector &range,
 	std::vector<double> &px,

@@ -155,6 +155,7 @@ do_work_sigma_2 <- function(data, date, obs, p0, a0,
         summarise(!!!summ_expr, !!!preserve_vars) %>%
         mutate(PX = PX - p0[1], PY = PY - p0[2])
 
+
     if (vec_size(prepData) == 1L) {
         result <- prepData %>%
             rename(JD = mJD, Px = PX, Py = PY) %>%
