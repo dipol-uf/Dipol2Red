@@ -4,7 +4,15 @@
 #include <cmath>
 #include <tuple>
 
-typedef std::tuple<double, double, double, int, int, double, std::vector<double>>  avg_result;
+typedef std::tuple<
+	double,					// Px
+	double,					// Py
+	double,					// SG
+	int,					// Itt
+	int,					// N
+	double,					// Ratio
+	std::vector<double>>    // Q
+	avg_result;
 
 double average(const std::vector<double> &input);
 double sum(const std::vector<double> &input);
@@ -32,7 +40,7 @@ std::vector<double> make_cov(
 	double avg_y);
 
 
-avg_result average_single_raw(
+avg_result average_single(
 	const std::vector<double> &px,
 	const std::vector<double> &py);
 

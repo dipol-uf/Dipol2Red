@@ -27,15 +27,4 @@ Rcpp::List extract_extra_cols(
 
 double average_vector(const Rcpp::NumericVector &input);
 
-Rcpp::List average_single(
-	const std::vector<double> &px, 
-	const std::vector<double> &py);
-
-
-Rcpp::List average_multiple(
-	const std::vector<double> &px,
-	const std::vector<double> &py, 
-	double eps,
-	int itt_max);
-
 void postprocess_pol(Rcpp::List &input);

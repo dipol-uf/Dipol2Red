@@ -153,7 +153,7 @@ avg_result average_single(
 	if (px.size() != 1 || py.size() != 1)
 		throw std::range_error("Vector of length > 1 provided where single values was expected.");
 
-	return {0.0, 0.0, 0.0, 1, 1, 0.0, std::vector<double>(4, 0)};
+	return std::make_tuple(0.0, 0.0, 0.0, 1, 1, 0.0, std::vector<double>(4, 0));
 }
 
 avg_result average_multiple(
@@ -231,8 +231,8 @@ avg_result average_multiple(
 			break;
 	}
 
-	return { mean_px, mean_py, sg, i,
+	return std::make_tuple(mean_px, mean_py, sg, i,
 		static_cast<int>(size),
 		0.5 * n_w / static_cast<int>(size),
-		make_cov(px, py, wx, wy, mean_px, mean_py) };
+		make_cov(px, py, wx, wy, mean_px, mean_py));
 }
