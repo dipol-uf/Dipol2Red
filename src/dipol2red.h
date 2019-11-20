@@ -4,7 +4,6 @@
 #include "math.h"
 
 constexpr auto batch_size = 4;
-constexpr auto std_init = 1e-100;
 
 RcppExport SEXP d2r_do_work_sigma_2_ex(
 	SEXP input, 
@@ -31,6 +30,8 @@ double average_vector(const Rcpp::NumericVector &input);
 Rcpp::List average_single(
 	const std::vector<double> &px, 
 	const std::vector<double> &py);
+
+
 Rcpp::List average_multiple(
 	const std::vector<double> &px,
 	const std::vector<double> &py, 

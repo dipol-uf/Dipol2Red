@@ -1,5 +1,7 @@
 ﻿#include "math.h"
 
+constexpr auto std_init = 1e-100;
+
 namespace {
 	long double sum_(const std::vector<double> &input)
 	{
@@ -142,4 +144,95 @@ std::vector<double> make_cov(
 	result[3] = static_cast<double>(w_y_sum * dot_prod_(w_y, y, y) / w_y_corr);
 
 	return result;
+}
+
+avg_result average_single(
+	const std::vector<double> &px,
+	const std::vector<double> &py)
+{
+	if (px.size() != 1 || py.size() != 1)
+		throw std::range_error("Vector of length > 1 provided where single values was expected.");
+
+	return {0.0, 0.0, 0.0, 1, 1, 0.0, std::vector<double>(4, 0)};
+}
+
+avg_result average_multiple(
+	const std::vector<double> &px,
+	const std::vector<double> &py,
+	const double eps,
+	const int itt_max)
+{
+	auto std = std_init;
+
+	if (px.size() != py.size())
+		throw std::range_error("Input vectors are of different sizes");
+
+	const auto size = px.size();
+	std::vector<double> wx(size, 1);
+	std::vector<double> wy(size, 1);
+
+	std::vector<double> dx(size, 0);
+	std::vector<double> dy(size, 0);
+
+
+	auto mean_px = average(px);
+	auto mean_py = average(py);
+	auto sg = 0.0;
+	auto n_w = 0;
+	auto i = 0;
+
+	for (; i < itt_max; i++)
+	{
+		abs_diff(px, mean_px, dx);
+		abs_diff(py, mean_py, dy);
+
+		n_w = 0.0;
+		for (size_t j = 0; j < size; j++)
+		{
+			if (dx[j] > 3 * std)
+			{
+				wx[j] = 0.0;
+				n_w++;
+			}
+			else if (dx[j] > 2 * std)
+			{
+				wx[j] = 1 / pow(2 * dx[j] / std - 3, 2);
+				n_w++;
+			}
+			else
+				wx[j] = 1.0;
+
+			if (dy[j] > 3 * std)
+			{
+				wy[j] = 0.0;
+				n_w++;
+			}
+			else if (dy[j] > 2 * std)
+			{
+				wy[j] = 1 / pow(2 * dy[j] / std - 3, 2);
+				n_w++;
+			}
+			else
+				wy[j] = 1.0;
+		}
+
+		const auto sum_wx = sum(wx);
+		const auto sum_wy = sum(wy);
+		const auto comp_px = dot_prod(wx, px) / sum_wx;
+		const auto comp_py = dot_prod(wy, py) / sum_wy;
+		const auto sg_x = weighted_sg(wx, px, comp_px, sum_wx);
+		const auto sg_y = weighted_sg(wy, py, comp_py, sum_wy);
+		sg = sqrt((sg_x + sg_y) / (sum_wx + sum_wy - 2));
+		std = sg * sqrt((sum_wx + sum_wy) / 2);
+		const auto delta = sqrt((pow(comp_px - mean_px, 2) + pow(comp_py - mean_py, 2)) / 2);
+		mean_px = comp_px;
+		mean_py = comp_py;
+		if (delta <= eps)
+			break;
+	}
+
+	return { mean_px, mean_py, sg, i,
+		static_cast<int>(size),
+		0.5 * n_w / static_cast<int>(size),
+		make_cov(px, py, wx, wy, mean_px, mean_py) };
 }

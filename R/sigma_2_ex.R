@@ -36,25 +36,33 @@ sigma_2_ex <- function(data,
     #assert_that(is.number(eqtrialCorrFactor))
     #assert_that(is.count(ittMax))
     #assert_that(is.number(eps), eps > 0)
-    
-    data %>%
-        group_split %>%
-        map(~do_work_sigma_2_ex(
-                .x,
-                as_name(ensym(date_col)),
-                as_name(ensym(obs_col)),
-                1:vec_size(.x),
-                extra_vars,
-                eps,
-                ittMax)) %>%
-        {vec_rbind(!!!.) }
+
+
+    indices <- group_indices(data)
+    unique <- sort(unique(indices))
+
+    idx <- map(unique, ~ which(indices == .x))
+    do_work_sigma_2_ex(data,
+                       as_name(ensym(date_col)),
+                       as_name(ensym(obs_col)),
+                       idx,
+                       extra_vars,
+                       eps,
+                       ittMax)
+
+    #data %>%
+        #group_split %>%
+        #map(~do_work_sigma_2_ex(
+                #.x,
+                #as_name(ensym(date_col)),
+                #as_name(ensym(obs_col)),
+                #1:vec_size(.x),
+                #extra_vars,
+                #eps,
+                #ittMax)) %>%
+        #{vec_rbind(!!!.) }
                     #select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt, one_of(extra_vars))) %>%
                         #bind_rows
-    #else
-        #result <- do_work_sigma_2(data, !!date, !!obs, p0, a0, eqtrialCorrFactor, ittMax, eps, extra_vars = extra_vars) %>%
-               #select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt, one_of(extra_vars))
-
-    #return(result)
 }
 
 

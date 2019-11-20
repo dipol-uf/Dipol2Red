@@ -35,11 +35,12 @@ SEXP d2r_do_work_sigma_2_ex(
 	const auto data_frame = as<DataFrame>(input);
 	const auto x_col = as<std::string>(as<CharacterVector>(date_col)[0]);
 	const auto y_col = as<std::string>(as<CharacterVector>(obs_col)[0]);
-	const auto idx = as<IntegerVector>(what);
 	const auto extra_cols = as<std::vector<std::string>>(extra_vars);
 	const auto eps_val = as<double>(eps);
 	const auto itt_max_val = as<int>(itt_max);
 
+	const auto idx_t = as<List>(what);
+	const auto idx = as <IntegerVector>(idx_t[0]);
 	
 	if (idx.length() % batch_size != 0)
 		forward_rcpp_exception_to_r(exception("`what` should be divisible by 4."));
@@ -52,7 +53,7 @@ SEXP d2r_do_work_sigma_2_ex(
 	const auto data = as<NumericVector>(data_frame[y_col]);
 	
 	mag_2_px_py(data, idx, px, py);
-	auto out_list = extract_extra_cols(extra_cols, data_frame, idx);
+	auto out_list = List();//extract_extra_cols(extra_cols, data_frame, idx);
 
 	const auto avg = nrow == 1
 		? average_single(px, py)

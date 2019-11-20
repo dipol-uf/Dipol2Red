@@ -1,7 +1,10 @@
 ﻿#pragma once
 #include <vector>
 #include <stdexcept>
-#include<cmath>
+#include <cmath>
+#include <tuple>
+
+typedef std::tuple<double, double, double, int, int, double, std::vector<double>>  avg_result;
 
 double average(const std::vector<double> &input);
 double sum(const std::vector<double> &input);
@@ -27,3 +30,14 @@ std::vector<double> make_cov(
 	const std::vector<double> &w_y,
 	double avg_x,
 	double avg_y);
+
+
+avg_result average_single_raw(
+	const std::vector<double> &px,
+	const std::vector<double> &py);
+
+avg_result average_multiple(
+	const std::vector<double> &px,
+	const std::vector<double> &py,
+	const double eps,
+	const int itt_max);
