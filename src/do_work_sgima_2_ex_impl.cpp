@@ -1,5 +1,4 @@
 ﻿#include "dipol2red.h"
-#include "vctrs_provider.h"
 
 using namespace Rcpp;
 
@@ -31,7 +30,16 @@ SEXP d2r_do_work_sigma_2_ex(
 	
 	mag_2_px_py(arg, data, idx, px, py);
 	auto preserved_cols = extract_extra_cols(extra_cols, data_frame, idx);
-	preserved_cols.push_front(wrap(average_vector(arg)), "JD");
+
+	const auto avg = nrow == 1
+		? average_single(px, py)
+		: average_multiple(px, py);
+		preserved_cols.push_back(avg["Wy"], "Wy");
+		preserved_cols.push_back(avg["Wx"], "Wx");
+		preserved_cols.push_back(avg["Py"], "Py");
+		preserved_cols.push_back(avg["Px"], "Px");
+	
+	preserved_cols.push_back(wrap(average_vector(arg)), "JD");
 		
 	return preserved_cols;
 }
@@ -98,4 +106,105 @@ double average_vector(const NumericVector &input)
 		sum += itt;
 
 	return static_cast<double>(sum / input.length());
+}
+
+List average_single(const std::vector<double> &px, const std::vector<double> &py)
+{
+	if (px.size() != 1 || py.size() != 1)
+	{
+		forward_rcpp_exception_to_r(exception("Vector of length > 1 provided where single values was expected."));
+		return R_NilValue;
+	}
+
+	return List::create(
+		_["Px"] = wrap(px[0]),
+		_["Py"] = wrap(py[0]),
+		_["Wx"] = wrap(1.0),
+		_["Wy"] = wrap(1.0));
+}
+
+List average_multiple(
+	const std::vector<double> &px, 
+	const std::vector<double> &py)
+{
+	const size_t itt_max = 15;
+	auto std = 1e100;
+	auto delta = 1e100;
+	const auto eps = 1e-6;
+	
+	if (px.size() !=  py.size() )
+	{
+		forward_exception_to_r(std::range_error("Input vectors are of different sizes"));
+		return R_NilValue;
+	}
+
+	const auto size = px.size();
+	std::vector<double> wx(size,1);
+	std::vector<double> wy(size, 1);
+
+	std::vector<double> dx(size, 0);
+	std::vector<double> dy(size, 0);
+
+	
+	auto mean_px = average(px);
+	auto mean_py = average(py);
+	auto n_w = 0;
+	size_t i = 0;
+	for(; i < itt_max; i++)
+	{
+
+		abs_diff(px, mean_px, dx);
+		abs_diff(py, mean_py, dy);
+
+		for(size_t j = 0; j < size; j++)
+		{
+			if (dx[j] > 3 * std)
+			{
+				wx[j] = 0.0;
+				n_w++;
+			}
+			else if (dx[j] > 2 * std)
+			{
+				wx[j] = 1 / pow(2 * dx[j] / std - 3, 2);
+				n_w++;
+			}
+			else
+				wx[j] = 1.0;
+
+			if (dy[j] > 3 * std)
+			{
+				wy[j] = 0.0;
+				n_w++;
+			}
+			else if (dy[j] > 2 * std)
+			{
+				wy[j] = 1 / pow(2 * dy[j] / std - 3, 2);
+				n_w++;
+			}
+			else
+				wy[j] = 1.0;
+		}
+
+		const auto sum_wx = sum(wx);
+		const auto sum_wy = sum(wy);
+		const auto comp_px = dot_prod(wx, px) / sum_wx;
+		const auto comp_py = dot_prod(wy, py) / sum_wy;
+		const auto sg_x = weighted_sg(wx, px, comp_px, sum_wx);
+		const auto sg_y = weighted_sg(wy, py, comp_py, sum_wy);
+		const auto sg = sqrt((sg_x + sg_y) / (sum_wx + sum_wy - 2));
+		std = sg * sqrt((sum_wx + sum_wy) / 2);
+		delta = sqrt((pow(comp_px - mean_px, 2) + pow(comp_py - mean_py, 2)) / 2);
+		mean_px = comp_px;
+		mean_py = comp_py;
+		Rcout << std << "\t" << delta << "\t" << mean_px << "\t" << mean_py <<  std::endl;
+
+		if (delta <= eps)
+			break;
+	}
+	
+	return List::create(
+		_["Px"] = wrap(mean_px),
+		_["Py"] = wrap(mean_py),
+		_["Wx"] = wrap(average(wx)),
+		_["Wy"] = wrap(average(wy)));
 }

@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "imports.h"
+#include "vctrs_provider.h"
+#include "math.h"
 
 RcppExport SEXP d2r_do_work_sigma_2_ex(
 	SEXP input, 
@@ -22,4 +24,5 @@ Rcpp::List extract_extra_cols(
 
 double average_vector(const Rcpp::NumericVector &input);
 
-Rcpp::List average_multiple();
+Rcpp::List average_single(const std::vector<double> &px, const std::vector<double> &py);
+Rcpp::List average_multiple(const std::vector<double> &px, const std::vector<double> &py);
