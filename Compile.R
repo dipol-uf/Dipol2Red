@@ -34,7 +34,22 @@ if (interactive()) {
     library(assertthat)
 
     purrr::walk(fs::dir_ls("R", glob = "*R"), source)
-    
+
+    if (!exists("compile_src"))
+        compile_src <<- function() {
+            cmds <- vctrs::vec_c(
+                "rm src/*dll",
+                "rm src/*o",
+                "cd src && RCMD.exe SHLIB *cpp -o dipol_2_red.dll")
+
+            purrr::map_int(cmds, shell)
+            if (getLoadedDLLs() %>% names %>% stringr::str_detect("dipol_2_red") %>% any)
+                dyn.unload("src/dipol_2_red.dll")
+
+            dyn.load("src/dipol_2_red.dll", local = FALSE)
+        }
+
+    compile_src()
 } else {
 
     message("Running `roxygen2::roxygenize`...")
