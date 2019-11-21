@@ -29,14 +29,6 @@
 #' @param root Root for the files in the descriptor.
 #' @aliases load_from_legacy_descriptor
 #' @export
-#' @importFrom purrr %>% map map_if walk2 map2_chr
-#' @importFrom rlang set_names
-#' @importFrom readr read_csv cols
-#' @importFrom glue glue
-#' @importFrom vctrs vec_c vec_size
-#' @importFrom fs path
-#' @importFrom stringr str_match
-#' @importFrom dplyr rename mutate if_else pull as_tibble
 LoadFromLegacyDescriptor <- function(desc, root = ".") {
     data <- desc %>%
         map(extract2, "File") %>%
@@ -46,8 +38,8 @@ LoadFromLegacyDescriptor <- function(desc, root = ".") {
 
     walk2(data, desc, function(obs, des) {
             if (vec_size(obs) != des$Count)
-                warning(glue("Read number of observations ({nrow(obs)}) ",
-                    "does not match expected number ({des$Count})."))
+                warning(paste0("Read number of observations (", nrow(obs), ") ",
+                    "does not match expected number (", des$Count, ")."))
             })
 
     return(data)

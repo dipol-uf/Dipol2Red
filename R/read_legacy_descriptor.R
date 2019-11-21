@@ -27,15 +27,6 @@
 #' @param path Path to the descriptor file (e.g. \code{Vin.txt})
 #' @aliases read_legacy_descriptor
 #' @export
-#' @importFrom glue glue
-#' @importFrom readr read_lines parse_integer
-#' @importFrom purrr map map_at
-#' @importFrom utils tail
-#' @importFrom stringr str_match
-#' @importFrom rlang set_names
-#' @importFrom purrr %>%
-#' @importFrom assertthat assert_that is.readable
-#' @importFrom vctrs vec_size vec_c
 ReadLegacyDescriptor <- function(path) {
     assert_that(is.readable(path))
 

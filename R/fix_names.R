@@ -30,10 +30,6 @@ utils::globalVariables(vctrs::vec_c("Obj", "Name", "Src", "Result"))
 #'
 #' @return R-compatible names suitable for further work
 #' @export
-#' @importFrom dplyr %>% as_tibble mutate if_else pull
-#' @importFrom glue glue
-#' @importFrom stringr str_match
-#' @importFrom vctrs vec_c vec_in
 fix_names <- function(x) {
     UseMethod("fix_names")
 }
@@ -47,7 +43,7 @@ fix_names.character <- function(x) {
         mutate(
             Name = tolower(Name),
             Src = x,
-            Id = if_else(nzchar(Id) & !is.na(Id), glue("_{Id}"), glue(""))) %>%
+            Id = if_else(nzchar(Id) & !is.na(Id), paste0("_", Id), "")) %>%
         mutate(
             Name = case_when(
                 vec_in(Name, vec_c("jd", "date", "mjd")) ~ "JD",

@@ -22,7 +22,7 @@
 #   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 #   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-utils::globalVariables(c("n1", "n2"))
+utils::globalVariables(c("temp_n[1]", "temp_n[2]"))
 
 #' @title h_test
 #' @description Performs Hotelling T^2 test on the Dipol-2 averages
@@ -32,13 +32,6 @@ utils::globalVariables(c("n1", "n2"))
 #' @param sg Sigma column name
 #' @param cov Covariance column name
 #' @param n Number of observations column name
-#' @importFrom assertthat assert_that
-#' @importFrom rlang ensym !! flatten_dbl as_double
-#' @importFrom vctrs vec_c %<-% vec_size
-#' @importFrom dplyr %>% select slice 
-#' @importFrom tibble tibble is_tibble
-#' @importFrom stats pf
-#' @importFrom magrittr extract2
 #' @export
 
 h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
@@ -58,10 +51,9 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
     sigma1 <- data %>% extract2(1, cov)
     sigma2 <- data %>% extract2(2, cov)
 
-    c(n1, n2) %<-% (data %>% pull(!!n))
-
-    nu1 <- n1 - 1L
-    nu2 <- n2 - 1L
+    temp_n <- pull(data, !!n)
+    nu1 <- temp_n[1] - 1L
+    nu2 <- temp_n[2] - 1L
     k <- 2L
     S <- 1.0 / (nu1 + nu2) * (nu1 * sigma1 + nu2 * sigma2)
 
@@ -69,10 +61,10 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
 
     XY <- mean1 - mean2
 
-    T2 <- n1 * n2 * dot_prod(t(XY), I_S %*% (XY)) / (n1 + n2)
-    f <- (n1 + n2 - 1 - k) * T2 / ((n1 + n2 - 2) * k)
+    T2 <- temp_n[1] * temp_n[2] * dot_prod(t(XY), I_S %*% (XY)) / (temp_n[1] + temp_n[2])
+    f <- (temp_n[1] + temp_n[2] - 1 - k) * T2 / ((temp_n[1] + temp_n[2] - 2) * k)
     d1 <- k
-    d2 <- n1 + n2 - 1L - k
+    d2 <- temp_n[1] + temp_n[2] - 1L - k
 
     p <- pf(f, d1, d2)
     p_inv <- pf(f, d1, d2, lower.tail = FALSE)
@@ -82,6 +74,5 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
         "p" = p, "1-p" = p_inv,
         "lg(p)" = lgp,
         "lg(1-p)" = lgp_inv,
-        "d1" = d1, "d2" = d2, "n" = n1 + n2))
+        "d1" = d1, "d2" = d2, "n" = temp_n[1] + temp_n[2]))
 }
-
