@@ -38,13 +38,13 @@ test_that("Executing [Sigma_2] on the test data", {
                 mustWork = TRUE)) %>%
                 map(~mutate(.x, Test = 1:n()))
 
-    bandInfo <- get(data("BandInfo", package = "Dipol2Red"))
+    band_info <- get(data("BandInfo", package = "Dipol2Red"))
 
     result <- map2_dfr(data, desc,
         ~ sigma_2(
             data = .x,
-            filter = dplyr::filter(bandInfo, ID == .y$Filter)$Filter,
-            bandInfo = bandInfo, obs = Obj_1))
+            filter = dplyr::filter(band_info, ID == .y$Filter)$Filter,
+            band_info = band_info, obs = Obj_1))
 
     expect_equal(nrow(result), 2)
     expect_equal(result$JD, c(2458196.12, 2458222.10), tolerance = 1e-2)
@@ -61,13 +61,13 @@ test_that("[Sigma_2] handles column names", {
 
     data1 <- read_csv(pth)
     data2 <- data1 %>% set_names(c("NotJD", "Smth", "Obs1234"))
-    bandInfo <- get(data("BandInfo", package = "Dipol2Red")) %>%
+    band_info <- get(data("BandInfo", package = "Dipol2Red")) %>%
         filter(Filter == "V")
 
-    expect_error(sigma_2(data2, "V", bandInfo), "object 'JD' not found")
+    expect_error(sigma_2(data2, "V", band_info), "object 'JD' not found")
 
-   walk2(sigma_2(data2, "V", bandInfo, date = NotJD, obs = Obs1234),
-        sigma_2(data2, "V", bandInfo, date = !!sym("NotJD"), obs = !!sym("Obs1234")),
+   walk2(sigma_2(data2, "V", band_info, date = NotJD, obs = Obs1234),
+        sigma_2(data2, "V", band_info, date = !!sym("NotJD"), obs = !!sym("Obs1234")),
         expect_equal)
 
 
@@ -87,24 +87,25 @@ test_that("[sigma_2] and [sigma_2_ex] do the same", {
                 mustWork = TRUE)) %>%
                 map(~mutate(.x, Test = 1:n()))
 
-    bandInfo <- get(data("BandInfo", package = "Dipol2Red")) %>%
+    band_info <- get(data("BandInfo", package = "Dipol2Red")) %>%
         mutate(Angle = 0.0, Px = 0.0, Py = 0.0)
 
     result <- map2_dfr(data, desc,
         ~ sigma_2(
             data = .x,
-            filter = dplyr::filter(bandInfo, ID == .y$Filter)$Filter,
-            bandInfo = bandInfo, obs = Obj_1))
+            filter = dplyr::filter(band_info, ID == .y$Filter)$Filter,
+            band_info = band_info,
+            obs = Obj_1))
 
     result_2 <- map2_dfr(data, desc,
         ~ fsigma_2(
             data = .x,
             obs = Obj_1))
 
-    # Uncertainty caused by various constants
-    expect_equal(result$Px, result_2$Px, tolerance = 1e-5)
-    expect_equal(result$Py, result_2$Py, tolerance = 1e-5)
-    expect_equal(result$SG, result_2$SG, tolerance = 1e-5)
-    expect_equal(result$JD, result_2$JD, tolerance = 1e-5)
-    expect_equal(result$A, result_2$A, tolerance = 1e-3)
+    # Exact equality is achieved
+    expect_equal(result$Px, result_2$Px)
+    expect_equal(result$Py, result_2$Py)
+    expect_equal(result$SG, result_2$SG)
+    expect_equal(result$JD, result_2$JD)
+    expect_equal(result$A, result_2$A)
 })

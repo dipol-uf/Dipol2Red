@@ -33,108 +33,110 @@ utils::globalVariables(vctrs::vec_c(
 #' @rdname sigma_2
 #' @param data Input data in form of a \code{tibble}.
 #' @param filter Filter name.
-#' @param bandInfo A \code{tibble} containing
+#' @param band_info A \code{tibble} containing
 #' filter descriptions.
 #' @param ... Extra variables that should be preserved. Method preserves first element of the column
-#' @param eqtrialCorrFactor Equatorial correction for the angle.
-#' @param ittMax Maximum iterations to perform.
+#' @param eqtrialCorrFactor \emph{Deprecated since 0.4.1 and no longer used}.
+#' @param itt_max Maximum iterations to perform.
 #' @param eps Tolerance. If average difference between previous and current step
 #' is smaller than \code{eps}, execution stops.
 #' @param date Name of the date column. Supports \code{rlang}
 #' quasiquotiong.
 #' @param obs Name of the observations column. Supports \code{rlang}
 #' quasiquotiong.
+#' @param ittMax \emph{Deprecated since 0.4.1 in favor of \code{itt_max}}.
+#' @param bandInfo \emph{Deprecated since 0.4.1 in favor of \code{band_info}}.
 #' @export
 #' @aliases sigma_2
-#' @importFrom dplyr %>% pull mutate group_by summarise if_else n select tbl_vars
-#' @importFrom dplyr transmute group_map is_grouped_df bind_cols bind_rows one_of
-#' @importFrom magrittr %<>% extract extract2 subtract
-#' @importFrom rlang enquo !! is_null flatten_dbl as_function enquos is_empty is_character syms quo
-#' @importFrom assertthat assert_that on_failure is.string is.number is.count on_failure<-
-#' @importFrom vctrs vec_c vec_cast_common vec_size vec_recycle
-#' @importFrom tidyselect vars_select
 sigma_2 <- function(data,
                         filter = "B",
-                        bandInfo = NULL,
+                        band_info = NULL,
                         ...,
-                        eqtrialCorrFactor = 0.034907,
-                        ittMax = 500L,
+                        itt_max = 500L,
                         eps = 1e-16,
                         date = JD,
-                        obs = Obs) {
+                        obs = Obs,
+                        eqtrialCorrFactor = lifecycle::deprecated(),
+                        bandInfo = lifecycle::deprecated(),
+                        ittMax = lifecycle::deprecated()) {
+
+    if(!is_missing(ittMax))
+        lifecycle::deprecate_soft("0.4.1", "Dipol2Red::sigma_2(eqtrialCorrFactor =)",
+                              details = "Parameter is no longer used")
+    if (!is_missing(ittMax)) {
+        lifecycle::deprecate_warn("0.4.1", "Dipol2Red::sigma_2(ittMax =)", "Dipol2Red::sigma_2(itt_max =)")
+        itt_max <- ittMax
+    }
+    if (!is_missing(bandInfo)) {
+        lifecycle::deprecate_warn("0.4.1", "Dipol2Red::sigma_2(bandInfo =)", "Dipol2Red::sigma_2(band_info =)")
+        band_info <- bandInfo
+    }
+
     date <- enquo(date)
     obs <- enquo(obs)
 
     extra_vars <- tidyselect::vars_select(dplyr::tbl_vars(data), !!!enquos(...))
-    
 
     assert_that(is_tibble(data))
     assert_that(is.string(filter))
-    assert_that(is.number(eqtrialCorrFactor))
-    assert_that(is.count(ittMax))
+    assert_that(is.count(itt_max))
     assert_that(is.number(eps), eps > 0)
 
-    if (rlang::is_null(bandInfo)) {
-        if(!exists("BandInfo", envir = .GlobalEnv))
+    if (rlang::is_null(band_info)) {
+        if (!exists("BandInfo", envir = .GlobalEnv))
             data("BandInfo", package = "Dipol2Red", envir = .GlobalEnv)
-        bandInfo <- BandInfo
+        band_info <- BandInfo
     }
 
-    assert_that(is_tibble(bandInfo))
+    assert_that(is_tibble(band_info))
 
-    bandInfo %<>% filter(Filter == filter)
-
-    p0 <- bandInfo %>% extract(1L, vec_c("Px", "Py")) %>% flatten_dbl
-    a0 <- bandInfo %>% slice(1) %>% pull(Angle)
+    band_info %<>% filter(Filter == filter)
+    p0 <- band_info %>% extract(1L, vec_c("Px", "Py")) %>% flatten_dbl
+    a0 <- band_info %>% slice(1) %>% pull(Angle)
 
     if (is_grouped_df(data))
         result <- data %>%
             group_map(
-                ~do_work_sigma_2(.x, !!date, !!obs, p0, a0, eqtrialCorrFactor, ittMax, eps, extra_vars = extra_vars) %>%
+                ~do_work_sigma_2(.x, !!date, !!obs, p0, a0, itt_max, eps, extra_vars = extra_vars) %>%
                     select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt, one_of(extra_vars)) %>%
                     bind_cols(.y)) %>%
             bind_rows
     else
-        result <- do_work_sigma_2(data, !!date, !!obs, p0, a0, eqtrialCorrFactor, ittMax, eps, extra_vars = extra_vars) %>%
+        result <- do_work_sigma_2(data, !!date, !!obs, p0, a0, itt_max, eps, extra_vars = extra_vars) %>%
                select(JD, Px, Py, P, SG, A, SG_A, Q, N, Ratio, Itt, one_of(extra_vars))
 
-    return (result)
+    return(result)
 }
 
 #' @rdname sigma_2
 #' @export
 Sigma_2 <- sigma_2
 
-assertthat::on_failure(is_tibble) <- function(call, env) paste0("`", deparse(call[[2]]), "` is not a tibble")
-
 dot_prod <- function(x, y) {
-    vec_cast_common(x, y)
-    sum(x * y)
+    result <- vec_recycle_common(!!!vec_cast_common(x, y))
+    sum(result[[1]] * result[[2]])
 }
 
-
 do_work_sigma_2 <- function(data, date, obs, p0, a0,
-                            eqtrialCorrFactor,
-                            ittMax, eps,
+                            itt_max, eps,
                             get_px = ~100.0 * (.x[1] - .x[3]),
                             get_py = ~100.0 * (.x[2] - .x[4]),
                             extra_vars = NULL) {
-
     date <- enquo(date)
     obs <- enquo(obs)
-    
+
     get_px <- as_function(get_px)
     get_py <- as_function(get_py)
 
     # `Magical` parameter.
     # Every 4 observations give 1 polarization measurement.
-    nObsPerMes <- 4L
-    err_msg <- paste("Input table should have a multiple of", nObsPerMes, "rows")
-    assert_that(vec_size(data) %% nObsPerMes == 0L, msg = err_msg)
+    n_obs_per_measure <- 4L
+    err_msg <- paste("Input table should have a multiple of", n_obs_per_measure, "rows")
+    assert_that(vec_size(data) %% n_obs_per_measure == 0L, msg = err_msg)
 
     # Store mean polarizations between iterations
-    pxMean <- vec_recycle(0L, vec_size(data) / nObsPerMes)
-    pyMean <- vec_recycle(0L, vec_size(data) / nObsPerMes)
+    px_mean <- vec_recycle(0L, vec_size(data) / n_obs_per_measure)
+    py_mean <- vec_recycle(0L, vec_size(data) / n_obs_per_measure)
 
     std <- 0
     delta <- 1e100
@@ -146,35 +148,30 @@ do_work_sigma_2 <- function(data, date, obs, p0, a0,
     else
         preserve_vars <- NULL
 
-    trnsfData <- data %>%
+    transformed_data <- data %>%
         mutate(JD = !!date, Q = 10 ^ (0.4 * !!obs)) %>%
-        mutate(Id = (1L:n() - 1L) %/% nObsPerMes + 1L) %>%
+        mutate(Id = (1L:n() - 1L) %/% n_obs_per_measure + 1L) %>%
         group_by(Id)
 
-    prepData <- trnsfData %>%
+    prepared_data <- transformed_data %>%
         summarise(!!!summ_expr, !!!preserve_vars) %>%
         mutate(PX = PX - p0[1], PY = PY - p0[2])
 
-
-    if (vec_size(prepData) == 1L) {
-        result <- prepData %>%
+    if (vec_size(prepared_data) == 1L) {
+        result <- prepared_data %>%
             rename(JD = mJD, Px = PX, Py = PY) %>%
             mutate(SG = 0, SG_A = 0, Cov = 0, N = 1L, Ratio = 0, Itt = 1L) %>%
             mutate(
                 P = sqrt(Px ^ 2L + Py ^ 2L),
-                A = (90 / pi * atan2(Py, Px) + a0) %% 180) %>%
-            mutate(
-                A = 90 / pi * A * eqtrialCorrFactor,
-                Px = P * cos(pi / 90 * A),
-                Py = P * sin(pi / 90 * A),
-                Q = list(matrix(vec_recycle(NA_real_, 4L), ncol = 2L)))
+                A = (90 / pi * atan2(Py, Px) + a0) %% 180,
+                Q = list(matrix(vec_recycle(NA_real_, 4L), ncol = 2L))) 
     }
 
     else
-        for (i in seq_len(ittMax)) {
-            result <- prepData %>%
+        for (i in seq_len(itt_max)) {
+            result <- prepared_data %>%
                 mutate(WX = 1, WY = 1) %>%
-                mutate(mPX = pxMean, mPY = pyMean) %>%
+                mutate(mPX = px_mean, mPY = py_mean) %>%
                 mutate(dX = abs(PX - mPX), dY = abs(PY - mPY)) %>% {
                     if (i > 1L) {
                         mutate(., WX = if_else(dX > 2 * std,
@@ -186,7 +183,7 @@ do_work_sigma_2 <- function(data, date, obs, p0, a0,
                     }
                     else
                         .
-                }  %>%
+                } %>%
                 summarise(
                     JD = mean(mJD),
                     NW = sum(sum(WX < 1), sum(WY < 1)),
@@ -205,20 +202,12 @@ do_work_sigma_2 <- function(data, date, obs, p0, a0,
                     !!!preserve_vars)
 
             delta <- sqrt(
-                        ((mean(pxMean) - result$Px) ^ 2 +
-                        (mean(pyMean) - result$Py) ^ 2) /
-                        (vec_size(pxMean) + vec_size(pyMean)))
-            
+                        ((mean(px_mean) - result$Px) ^ 2 +
+                        (mean(py_mean) - result$Py) ^ 2) /
+                        (vec_size(px_mean) + vec_size(py_mean)))
 
-            pxMean <- vec_recycle(result$Px, vec_size(pxMean))
-            pyMean <- vec_recycle(result$Py, vec_size(pyMean))
-
-            result %<>%
-                mutate(
-                    A = 90 / pi * A * eqtrialCorrFactor,
-                    Px = P * cos(pi / 90 * A),
-                    Py = P * sin(pi / 90 * A))
-
+            px_mean <- vec_recycle(result$Px, vec_size(px_mean))
+            py_mean <- vec_recycle(result$Py, vec_size(py_mean))
 
             std <- result %>% pull(STD)
 

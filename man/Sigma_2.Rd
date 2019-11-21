@@ -5,27 +5,27 @@
 \alias{Sigma_2}
 \title{sigma_2}
 \usage{
-sigma_2(data, filter = "B", bandInfo = NULL, ...,
-  eqtrialCorrFactor = 0.034907, ittMax = 500L, eps = 1e-16,
-  date = JD, obs = Obs)
+sigma_2(data, filter = "B", band_info = NULL, ..., itt_max = 500L,
+  eps = 1e-16, date = JD, obs = Obs,
+  eqtrialCorrFactor = lifecycle::deprecated(),
+  bandInfo = lifecycle::deprecated(), ittMax = lifecycle::deprecated())
 
-Sigma_2(data, filter = "B", bandInfo = NULL, ...,
-  eqtrialCorrFactor = 0.034907, ittMax = 500L, eps = 1e-16,
-  date = JD, obs = Obs)
+Sigma_2(data, filter = "B", band_info = NULL, ..., itt_max = 500L,
+  eps = 1e-16, date = JD, obs = Obs,
+  eqtrialCorrFactor = lifecycle::deprecated(),
+  bandInfo = lifecycle::deprecated(), ittMax = lifecycle::deprecated())
 }
 \arguments{
 \item{data}{Input data in form of a \code{tibble}.}
 
 \item{filter}{Filter name.}
 
-\item{bandInfo}{A \code{tibble} containing
+\item{band_info}{A \code{tibble} containing
 filter descriptions.}
 
 \item{...}{Extra variables that should be preserved. Method preserves first element of the column}
 
-\item{eqtrialCorrFactor}{Equatorial correction for the angle.}
-
-\item{ittMax}{Maximum iterations to perform.}
+\item{itt_max}{Maximum iterations to perform.}
 
 \item{eps}{Tolerance. If average difference between previous and current step
 is smaller than \code{eps}, execution stops.}
@@ -35,6 +35,12 @@ quasiquotiong.}
 
 \item{obs}{Name of the observations column. Supports \code{rlang}
 quasiquotiong.}
+
+\item{eqtrialCorrFactor}{\emph{Deprecated since 0.4.1 and no longer used}.}
+
+\item{bandInfo}{\emph{Deprecated since 0.4.1 in favor of \code{band_info}}.}
+
+\item{ittMax}{\emph{Deprecated since 0.4.1 in favor of \code{itt_max}}.}
 }
 \description{
 sigma_2
