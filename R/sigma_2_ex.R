@@ -65,40 +65,40 @@ do_work_sigma_2_ex <- function(data, date_col, obs_col,
 }
 
 
-compile_src <- function() {
-    cmds <- vec_c(
-                  "rm src/*dll",
-                  "rm src/*o",
-                  "cd src && RCMD.exe SHLIB *cpp -o dipol_2_red.dll")
+#compile_src <- function() {
+    #cmds <- vec_c(
+                  #"rm src/*dll",
+                  #"rm src/*o",
+                  #"cd src && RCMD.exe SHLIB *cpp -o dipol_2_red.dll")
 
-    map_int(cmds, shell)
-    if(getLoadedDLLs() %>% names %>% str_detect("dipol_2_red") %>% any)
-        dyn.unload("src/dipol_2_red.dll")
+    #map_int(cmds, shell)
+    #if(getLoadedDLLs() %>% names %>% str_detect("dipol_2_red") %>% any)
+        #dyn.unload("src/dipol_2_red.dll")
 
-    dyn.load("src/dipol_2_red.dll", local = FALSE)
-}
-
-#if (isNamespaceLoaded("rlang")) {
-    pth <- system.file("tests", "legacy_descriptor.dat",
-                    package = "Dipol2Red", mustWork = TRUE)
-    desc <- read_legacy_descriptor(pth)
-
-    data <- desc %>%
-        load_from_legacy_descriptor(
-            root = system.file(
-                "tests",
-                package = "Dipol2Red",
-                mustWork = TRUE)) %>%
-                imap(~mutate(.x, Test = 1:n() - 1L, Type = as_factor(.y))) %>%
-                RLibs::vec_rbind_uq %>%
-                group_by(Type)
-
-    #compile_src()
-    #sigma_2_ex(data, JD, Obj_1, Test) %>% print
-    #sigma_2(data, filter = "B", bandInfo = NULL, obs = Obj_1) %>% print
+    #dyn.load("src/dipol_2_red.dll", local = FALSE)
 #}
 
-microbenchmark::microbenchmark(
-    cpp = sigma_2_ex(data, JD, Obj_1, Test),
-    r = sigma_2(data, filter = "B", bandInfo = BandInfo, obs = Obj_1, Test),
-    times = 20L) %>% print
+##if (isNamespaceLoaded("rlang")) {
+    #pth <- system.file("tests", "legacy_descriptor.dat",
+                    #package = "Dipol2Red", mustWork = TRUE)
+    #desc <- read_legacy_descriptor(pth)
+
+    #data <- desc %>%
+        #load_from_legacy_descriptor(
+            #root = system.file(
+                #"tests",
+                #package = "Dipol2Red",
+                #mustWork = TRUE)) %>%
+                #imap(~mutate(.x, Test = 1:n() - 1L, Type = as_factor(.y))) %>%
+                #RLibs::vec_rbind_uq %>%
+                #group_by(Type)
+
+    ##compile_src()
+    ##sigma_2_ex(data, JD, Obj_1, Test) %>% print
+    ##sigma_2(data, filter = "B", bandInfo = NULL, obs = Obj_1) %>% print
+##}
+
+#microbenchmark::microbenchmark(
+    #cpp = sigma_2_ex(data, JD, Obj_1, Test),
+    #r = sigma_2(data, filter = "B", bandInfo = BandInfo, obs = Obj_1, Test),
+    #times = 20L) %>% print
