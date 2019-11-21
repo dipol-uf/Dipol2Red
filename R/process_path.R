@@ -24,8 +24,7 @@
 
 
 ## TODO: copy to {RLibs}
-process_path <- function(path)
-{
+process_path <- function(path) {
     path %>%
         fs::path_norm %>%
         str_split("/", simplify = TRUE) %>%
@@ -54,8 +53,6 @@ process_path <- function(path)
 #' @return A list of tibbles
 #' @export
 process_files <- function(path,  by = 4L) {
-    ## TODO : Remove
-    default_filter <- "B"
     files <- process_path(path)
     files <- set_names(files, fs::path_file(files))
 
@@ -83,32 +80,19 @@ process_files <- function(path,  by = 4L) {
             mutate(data, !!!q) -> data
         }
 
-        if (!any(str_detect(names(data), regex("filter", ignore_case = TRUE)))) {
-
-            rlang::warn(glue::glue("`Filter` column is missing in {fs::path_file(loc_path)}. Assuming default filter of `{default_filter}`."))
-            mutate(data, Filter = as_factor(default_filter)) -> data
-        }
-        else {
-            mutate(data, Filter = as_factor(Filter)) -> data
-        }
+        data %>%
+            fsigma_2(date_col = JD, obs_col = Obj_1) %>%
+            select(JD, Px, Py, P, SG, A, SG_A, N, Ratio) -> result_full
 
         data %>%
-            arrange(JD) %>%
-            group_split(Filter) %>%
-            set_names(map_chr(., ~ levels(.x$Filter)[.x$Filter[1]])) %>%
-            imap(~sigma_2(.x, filter = .y, bandInfo = NULL, date = JD, obs = Obj_1, Filter)) %>%
-            map(select, Filter, JD, Px, Py, P, SG, A, SG_A, N, Ratio) %>% { vec_rbind(!!!.) } -> result_full
+            mutate(Id = as_factor((1:n() - 1L) %/% (4L * by))) %>%
+            group_by(Id) %>%
+            fsigma_2(date_col = JD, obs_col = Obj_1) %>%
+            select(Id, JD, Px, Py, P, SG, A, SG_A, N, Ratio) -> result_individual
 
-        data %>%
-            arrange(JD) %>%
-            group_split(Filter) %>%
-            map(mutate, Id = (1:n() - 1L) %/% (4L * by)) %>%
-            map(group_by, Id) %>%
-            set_names(map_chr(., ~ levels(.x$Filter)[.x$Filter[1]])) %>%
-            imap(~sigma_2(.x, filter = .y, bandInfo = NULL, date = JD, obs = Obj_1, Filter)) %>%
-            map(select, Filter, JD, Px, Py, P, SG, A, SG_A, N, Ratio) %>% { vec_rbind(!!!.) } -> result_individual
-
-        return(list(Full = result_full, Individual = result_individual))
+        return(
+        list(Full = result_full, Individual = result_individual) %>%
+            map(mutate, JDF = JD - floor(JD)))
 
     }
 
