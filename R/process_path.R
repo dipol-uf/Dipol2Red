@@ -45,6 +45,7 @@ process_path <- function(path) {
         reduce(~map(.x, proc_dir, .y) %>% discard(~is.null(.x)) %>% flatten_chr)
 }
 
+utils::globalVariables(c("Obj_1"))
 #' @title process_files
 #'
 #' @param path Path to the files. Supports globbing
