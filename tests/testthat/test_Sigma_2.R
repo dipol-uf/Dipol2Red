@@ -23,57 +23,8 @@
 #   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-#context("[Sigma_2] tests.")
-#test_that("Executing [Sigma_2] on the test data", {
-    #pth <- system.file("tests", "legacy_descriptor.dat",
-                    #package = "Dipol2Red", mustWork = TRUE)
-
-    #desc <- read_legacy_descriptor(pth)
-
-    #data <- desc %>%
-        #load_from_legacy_descriptor(
-            #root = system.file(
-                #"tests",
-                #package = "Dipol2Red",
-                #mustWork = TRUE)) %>%
-                #map(~mutate(.x, Test = 1:n()))
-
-    #bandInfo <- get(data("BandInfo", package = "Dipol2Red"))
-
-    #result <- map2_dfr(data, desc,
-        #~ sigma_2(
-            #data = .x,
-            #filter = dplyr::filter(bandInfo, ID == .y$Filter)$Filter,
-            #bandInfo = bandInfo, obs = Obj_1))
-
-    #expect_equal(nrow(result), 2)
-    #expect_equal(result$JD, c(2458196.12, 2458222.10), tolerance = 1e-2)
-    #expect_equal(result$P, c(0.59770, 0.67309), tolerance = 1e-5)
-    #expect_equal(result$A, c(63.7010, 64.8771), tolerance = 1e-4)
-    #expect_equal(result$SG, c(0.0561595, 0.0658703), tolerance = 1e-7)
-    #expect_equal(result$SG_A, c(2.6839, 2.7947), tolerance = 1e-4)
-    #expect_equal(2 * result$N * result$Ratio, c(16, 3))
-#})
-
-#test_that("[Sigma_2] handles column names", {
-     #pth <- system.file("tests", "test1v.csv",
-                    #package = "Dipol2Red", mustWork = TRUE)
-
-    #data1 <- read_csv(pth)
-    #data2 <- data1 %>% set_names(c("NotJD", "Smth", "Obs1234"))
-    #bandInfo <- get(data("BandInfo", package = "Dipol2Red")) %>%
-        #filter(Filter == "V")
-
-    #expect_error(sigma_2(data2, "V", bandInfo), "object 'JD' not found")
-
-   #walk2(sigma_2(data2, "V", bandInfo, date = NotJD, obs = Obs1234),
-        #sigma_2(data2, "V", bandInfo, date = !!sym("NotJD"), obs = !!sym("Obs1234")),
-        #expect_equal)
-
-
-#})
-
-test_that("[sigma_2] and [sigma_2_ex] do the same", {
+context("[Sigma_2] tests.")
+test_that("Executing [Sigma_2] on the test data", {
     pth <- system.file("tests", "legacy_descriptor.dat",
                     package = "Dipol2Red", mustWork = TRUE)
 
@@ -95,10 +46,65 @@ test_that("[sigma_2] and [sigma_2_ex] do the same", {
             filter = dplyr::filter(bandInfo, ID == .y$Filter)$Filter,
             bandInfo = bandInfo, obs = Obj_1))
 
+    expect_equal(nrow(result), 2)
+    expect_equal(result$JD, c(2458196.12, 2458222.10), tolerance = 1e-2)
+    expect_equal(result$P, c(0.59770, 0.67309), tolerance = 1e-5)
+    expect_equal(result$A, c(63.7010, 64.8771), tolerance = 1e-4)
+    expect_equal(result$SG, c(0.0561595, 0.0658703), tolerance = 1e-7)
+    expect_equal(result$SG_A, c(2.6839, 2.7947), tolerance = 1e-4)
+    expect_equal(2 * result$N * result$Ratio, c(16, 3))
+})
+
+test_that("[Sigma_2] handles column names", {
+     pth <- system.file("tests", "test1v.csv",
+                    package = "Dipol2Red", mustWork = TRUE)
+
+    data1 <- read_csv(pth)
+    data2 <- data1 %>% set_names(c("NotJD", "Smth", "Obs1234"))
+    bandInfo <- get(data("BandInfo", package = "Dipol2Red")) %>%
+        filter(Filter == "V")
+
+    expect_error(sigma_2(data2, "V", bandInfo), "object 'JD' not found")
+
+   walk2(sigma_2(data2, "V", bandInfo, date = NotJD, obs = Obs1234),
+        sigma_2(data2, "V", bandInfo, date = !!sym("NotJD"), obs = !!sym("Obs1234")),
+        expect_equal)
+
+
+})
+
+test_that("[sigma_2] and [sigma_2_ex] do the same", {
+    pth <- system.file("tests", "legacy_descriptor.dat",
+                    package = "Dipol2Red", mustWork = TRUE)
+
+    desc <- read_legacy_descriptor(pth)
+
+    data <- desc %>%
+        load_from_legacy_descriptor(
+            root = system.file(
+                "tests",
+                package = "Dipol2Red",
+                mustWork = TRUE)) %>%
+                map(~mutate(.x, Test = 1:n()))
+
+    bandInfo <- get(data("BandInfo", package = "Dipol2Red")) %>%
+        mutate(Angle = 0.0, Px = 0.0, Py = 0.0)
+
+    result <- map2_dfr(data, desc,
+        ~ sigma_2(
+            data = .x,
+            filter = dplyr::filter(bandInfo, ID == .y$Filter)$Filter,
+            bandInfo = bandInfo, obs = Obj_1))
+
     result_2 <- map2_dfr(data, desc,
-        ~ sigma_2_ex(
+        ~ fsigma_2(
             data = .x,
             obs = Obj_1))
 
-    expect_true(all(map2_lgl(result, result_2, ~all(equals(unlist(.x), unlist(.y))))))
+    # Uncertainty caused by various constants
+    expect_equal(result$Px, result_2$Px, tolerance = 1e-5)
+    expect_equal(result$Py, result_2$Py, tolerance = 1e-5)
+    expect_equal(result$SG, result_2$SG, tolerance = 1e-5)
+    expect_equal(result$JD, result_2$JD, tolerance = 1e-5)
+    expect_equal(result$A, result_2$A, tolerance = 1e-3)
 })
