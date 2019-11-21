@@ -1,0 +1,43 @@
+---
+output: 
+    github_document:
+        html_preview: false
+---
+# `Dipol2Red`
+
+## Example usage
+```{r}
+library(tibble, quietly = TRUE, warn.conflicts = FALSE)
+library(dplyr, quietly = TRUE, warn.conflicts = FALSE)
+library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
+```
+
+- Simulating one observation with `1 %` polarization in `x` direction.
+    ```{r}
+    x_1 <- tibble(
+        JD = c(1, 2, 3, 4), 
+        Obs = 2.5 * log10(c(102, 100, 98, 100)))
+    fsigma_2(x_1)
+    ```
+
+- Simulating total polarization of `1 %` and equal `x` and `y` components.
+    ```{r}
+    x_2 <- tibble(
+        JD = 10 + c(1, 2, 3, 4), 
+        Obs = 2.5 * log10(c(101.4142, 101.4142, 98.5858, 98.5858)))
+    fsigma_2(x_2)
+    ```
+
+- Combining two datasets to obtain average over several observations.
+    ```{r}
+    x_3 <- bind_rows(x_1, x_2)
+    fsigma_2(x_3)
+    ```
+
+- Assigning groups, separating observations by `Run`. Recreates two original measurements. `fsigma_2` automatically detects grouping variables and appends these values to the output.
+
+    ```{r}
+    x_4 <- mutate(x_3, Run = factor(if_else(JD < 10, "First", "Second")))
+    x_4 <- group_by(x_4, Run)
+    fsigma_2(x_4)
+    ```
