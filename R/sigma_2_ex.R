@@ -70,27 +70,27 @@ fsigma_2_ <- function(data, date_col, obs_col,
 
 
 
-#if (isNamespaceLoaded("rlang")) {
-    pth <- system.file("tests", "legacy_descriptor.dat",
-                    package = "Dipol2Red", mustWork = TRUE)
-    desc <- read_legacy_descriptor(pth)
+##if (isNamespaceLoaded("rlang")) {
+    #pth <- system.file("tests", "legacy_descriptor.dat",
+                    #package = "Dipol2Red", mustWork = TRUE)
+    #desc <- read_legacy_descriptor(pth)
 
-    data <- desc %>%
-        load_from_legacy_descriptor(
-            root = system.file(
-                "tests",
-                package = "Dipol2Red",
-                mustWork = TRUE)) %>%
-                imap(~mutate(.x, Test = 1:n() - 1L, Type = as_factor(.y))) %>%
-                RLibs::vec_rbind_uq %>%
-                group_by(Type)
+    #data <- desc %>%
+        #load_from_legacy_descriptor(
+            #root = system.file(
+                #"tests",
+                #package = "Dipol2Red",
+                #mustWork = TRUE)) %>%
+                #imap(~mutate(.x, Test = 1:n() - 1L, Type = as_factor(.y))) %>%
+                #RLibs::vec_rbind_uq %>%
+                #group_by(Type)
 
-    #compile_src()
-    #fsigma_2(data, JD, Obj_1, Test) %>% print
-    #sigma_2(data, filter = "B", bandInfo = NULL, obs = Obj_1) %>% print
-#}
+    ##compile_src()
+    ##fsigma_2(data, JD, Obj_1, Test) %>% print
+    ##sigma_2(data, filter = "B", bandInfo = NULL, obs = Obj_1) %>% print
+##}
 
-microbenchmark::microbenchmark(
-    cpp = fsigma_2(data, JD, Obj_1, Test),
-    r = sigma_2(data, filter = "B", bandInfo = BandInfo, obs = Obj_1, Test),
-    times = 50L) %>% print
+#microbenchmark::microbenchmark(
+    #cpp = fsigma_2(data, JD, Obj_1, Test),
+    #r = sigma_2(data, filter = "B", bandInfo = BandInfo, obs = Obj_1, Test),
+    #times = 50L) %>% print

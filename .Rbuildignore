@@ -1,3 +1,10 @@
 .*\.vs.*
 Compile.R
 ^Dipol2Red.*
+CSVs
+Debug.*
+NativeImpl.*
+^.*opendb$
+^.*src.*dll$
+^.*src.*o$
+^.*src.*so$

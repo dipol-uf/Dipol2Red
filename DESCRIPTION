@@ -1,11 +1,13 @@
 Package: Dipol2Red
 Title: Dipol-2 data reduction pipeline
-Version: 0.3.4
+Version: 0.4.0
 Authors@R: c(person("Ilia", "Kosenkov", email = "ilia.kosenkov.at.gm@gmail.com", role = c("aut", "cre")),
              person("Vilppu", "Piirola", role = "aut"))
 Description: Provides tools to process .csv output of the Dipol-2 image reduction routine.
 Depends: R (>= 3.5)
+LinkinTo: Rcpp
 Imports:
+	Rcpp,
     dplyr,
     glue,
     readr,
@@ -18,7 +20,8 @@ Imports:
 	vctrs,
 	tibble,
 	fs,
-	tidyselect
+	tidyselect,
+	forcats
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

@@ -2,12 +2,21 @@
 % Please edit documentation in R/fix_names.R
 \name{fix_names}
 \alias{fix_names}
+\alias{fix_names.character}
+\alias{fix_names.tbl_df}
+\alias{fix_names.data.frame}
 \title{fix_names}
 \usage{
-fix_names(text)
+fix_names(x)
+
+\method{fix_names}{character}(x)
+
+\method{fix_names}{tbl_df}(x)
+
+\method{fix_names}{data.frame}(x)
 }
 \arguments{
-\item{text}{Names of the CSV file to replace}
+\item{x}{Names of the CSV file to replace}
 }
 \value{
 R-compatible names suitable for further work

@@ -24,16 +24,14 @@ process_path <- function(path)
 
 #' @title process_files
 #'
-#' @param path
-#' @param default_filter
-#' @param by
+#' @param path Path to the files. Supports globbing
+#' @param by Average by how many
 #'
-#' @return
+#' @return A list of tibbles
 #' @export
-#'
-#' @examples
-process_files <- function(path, default_filter = "B", by = 4L)
-{
+process_files <- function(path,  by = 4L) {
+    ## TODO : Remove
+    default_filter <- "B"
     files <- process_path(path)
     files <- set_names(files, fs::path_file(files))
 
@@ -91,22 +89,5 @@ process_files <- function(path, default_filter = "B", by = 4L)
     }
 
     files %>%
-        #head(3) %>%
-        map(proc) %>%
-        print_processed_files
+        map(proc)
 }
-
-
-#print_processed_files <- function(inputs) {
-    #sigfig <- options("pillar.sigfig")
-    #n_max <- options("tibble.print_max")
-
-    #options(pillar.sigfig = 9, tibble.print_max = Inf)
-
-    #print(inputs)
-    ##map(inputs, map, ~ print(.x, n = vec_size(.x), width = 115))
-
-    #options(pillar.sigfig = sigfig, tibble.print_max = n_max)
-
-    #return(invisible(inputs))
-#}
