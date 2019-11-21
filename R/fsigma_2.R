@@ -22,6 +22,19 @@
 #   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 #   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#' @title fsigma_2
+#'
+#' @param data Input (possibly grouped) tibble/data.frame in long format.
+#' @param date_col Date column name (which is quasiquoted), to uniquely identify and order measurements.
+#' @param obs_col Column containing magnitude difference between two rays (quasiquoted)
+#' @param itt_max \code{integer}, limits number of iterations to perform. Typically, \code{50} is enough.
+#' @param eps \code{double}, controls the convergence.
+#' @param ... Names of the extra columns (tidyselected) to include to the output.
+#' Values are taken as the first element in the group.
+#' @description Performs the same task as \code{Dipol2Red::sigma_2} using \code{C++} implementation.
+#' Much faster but requires calibration of data.
+#' @return Computed polarization parameters in form of a \code{tibble}
+#' @export
 fsigma_2 <- function(data,
                         date_col = JD,
                         obs_col = Obs,
@@ -54,7 +67,6 @@ fsigma_2 <- function(data,
         itt_max)
 }
 
-#' @importFrom tibble as_tibble
 fsigma_2_ <- function(data, date_col, obs_col,
                             what,
                             extra_vars = NULL,
@@ -67,30 +79,3 @@ fsigma_2_ <- function(data, date_col, obs_col,
             what,  extra_vars,
             eps, itt_max))
 }
-
-
-
-##if (isNamespaceLoaded("rlang")) {
-    #pth <- system.file("tests", "legacy_descriptor.dat",
-                    #package = "Dipol2Red", mustWork = TRUE)
-    #desc <- read_legacy_descriptor(pth)
-
-    #data <- desc %>%
-        #load_from_legacy_descriptor(
-            #root = system.file(
-                #"tests",
-                #package = "Dipol2Red",
-                #mustWork = TRUE)) %>%
-                #imap(~mutate(.x, Test = 1:n() - 1L, Type = as_factor(.y))) %>%
-                #RLibs::vec_rbind_uq %>%
-                #group_by(Type)
-
-    ##compile_src()
-    ##fsigma_2(data, JD, Obj_1, Test) %>% print
-    ##sigma_2(data, filter = "B", bandInfo = NULL, obs = Obj_1) %>% print
-##}
-
-#microbenchmark::microbenchmark(
-    #cpp = fsigma_2(data, JD, Obj_1, Test),
-    #r = sigma_2(data, filter = "B", bandInfo = BandInfo, obs = Obj_1, Test),
-    #times = 50L) %>% print

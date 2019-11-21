@@ -23,6 +23,14 @@
 //   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
+#include "imports.h"
 
-#include <Rcpp.h>
-#include <Rinternals.h>
+namespace vctrs_provider
+{
+	Rcpp::Function vec_slice();
+}
+
+namespace base_provider
+{
+	Rcpp::Function order();
+}

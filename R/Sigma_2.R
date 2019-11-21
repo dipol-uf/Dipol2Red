@@ -150,6 +150,7 @@ do_work_sigma_2 <- function(data, date, obs, p0, a0,
 
     transformed_data <- data %>%
         mutate(JD = !!date, Q = 10 ^ (0.4 * !!obs)) %>%
+        arrange(JD) %>%
         mutate(Id = (1L:n() - 1L) %/% n_obs_per_measure + 1L) %>%
         group_by(Id)
 

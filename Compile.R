@@ -23,9 +23,6 @@
 #   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 if (interactive()) {
-    #roxygen2::roxygenise()
-    # Uncomment this to check the package from within interactive session
-    #devtools::check()
     library(tidyverse)
     library(magrittr)
     library(rlang)

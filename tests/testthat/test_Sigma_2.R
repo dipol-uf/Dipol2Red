@@ -38,6 +38,9 @@ test_that("Executing [Sigma_2] on the test data", {
                 mustWork = TRUE)) %>%
                 map(~mutate(.x, Test = 1:n()))
 
+    # Checks for unordered input
+    data %>%  map(arrange, sample(1:n())) -> data
+
     band_info <- get(data("BandInfo", package = "Dipol2Red"))
 
     result <- map2_dfr(data, desc,
@@ -90,6 +93,8 @@ test_that("[sigma_2] and [sigma_2_ex] do the same", {
     band_info <- get(data("BandInfo", package = "Dipol2Red")) %>%
         mutate(Angle = 0.0, Px = 0.0, Py = 0.0)
 
+    data %>% map(arrange, sample(1:n())) -> data
+
     result <- map2_dfr(data, desc,
         ~ sigma_2(
             data = .x,
@@ -97,7 +102,7 @@ test_that("[sigma_2] and [sigma_2_ex] do the same", {
             band_info = band_info,
             obs = Obj_1))
 
-    result_2 <- map2_dfr(data, desc,
+    result_2 <- map_dfr(data,
         ~ fsigma_2(
             data = .x,
             obs = Obj_1))

@@ -1,4 +1,29 @@
-﻿#include "dipol2red.h"
+﻿//   MIT License
+//
+//   Copyright(c) 2018 - 2019
+//   Ilia Kosenkov[ilia.kosenkov.at.gm@gmail.com],
+//	 Vilppu Piirola
+//
+//   Permission is hereby granted, free of charge, to any person obtaining a copy
+//   of this software and associated documentation files(the "Software"), to deal
+//   in the Software without restriction, including without limitation the rights
+//   to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+//   copies of the Software, and to permit persons to whom the Software is
+//   furnished to do so, subject to the following conditions :
+//
+//   The above copyright notice and this permission
+//   notice shall be included in all
+//   copies or substantial portions of the Software.
+//
+//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+//   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+//   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+//   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
+//   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+#include "dipol2red.h"
 
 using namespace Rcpp;
 
@@ -40,13 +65,15 @@ SEXP d2r_fsigma_2(
 		const auto eps_val = as<double>(eps);
 		const auto itt_max_val = as<int>(itt_max);
 
-		const auto idx_t = as<List>(what);
+		auto idx_t = as<List>(what);
 		const auto n_groups = idx_t.length();
 
 
 		const auto arg = as<NumericVector>(data_frame[x_col]);
 		const auto data = as<NumericVector>(data_frame[y_col]);
 
+		arrange_data(idx_t, arg);
+		
 		std::vector<double> px(n_groups);
 		std::vector<double> py(n_groups);
 		std::vector<double> sg(n_groups);
@@ -96,6 +123,10 @@ SEXP d2r_fsigma_2(
 
 		return result;
 	}
+	catch(exception &r_ex)
+	{
+		forward_rcpp_exception_to_r(r_ex);
+	}
 	catch(std::exception &ex)
 	{
 		forward_exception_to_r(ex);
@@ -110,8 +141,8 @@ SEXP d2r_fsigma_2(
 avg_result sigma_2(
 	const NumericVector &data,
 	const IntegerVector &range,
-	double eps_val,
-	int itt_max)
+	const double eps_val,
+	const int itt_max)
 {
 	if (range.length() % batch_size != 0)
 		throw std::logic_error("`what` should be divisible by 4.");
@@ -224,4 +255,21 @@ NumericVector average_arg(
 	}
 
 	return result;	
+}
+
+void arrange_data(
+	List &input, 
+	const NumericVector &arg)
+{
+	const auto order = base_provider::order();
+	const auto vec_slice = vctrs_provider::vec_slice();
+	
+	for(auto &writt : input)
+	{
+		const auto data = vec_slice(arg, as<IntegerVector>(writt));
+
+		const auto order_id = as<IntegerVector>(order(data));
+
+		writt = vec_slice(as<IntegerVector>(writt), order_id);
+	}
 }
