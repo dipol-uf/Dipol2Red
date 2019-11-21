@@ -5,7 +5,7 @@
 
 constexpr auto batch_size = 4;
 
-RcppExport SEXP d2r_do_work_sigma_2_ex(
+RcppExport SEXP d2r_fsigma_2(
 	SEXP input, 
 	SEXP date_col,
 	SEXP obs_col,

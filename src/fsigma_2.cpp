@@ -21,7 +21,7 @@ void debug_print(const std::vector<T> &input)
 }
 
 // [[Rcpp:export]]
-SEXP d2r_do_work_sigma_2_ex(
+SEXP d2r_fsigma_2(
 	SEXP input,
 	SEXP date_col,
 	SEXP obs_col,

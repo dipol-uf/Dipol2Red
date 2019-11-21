@@ -22,83 +22,75 @@
 #   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 #   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-sigma_2_ex <- function(data,
+fsigma_2 <- function(data,
                         date_col = JD,
                         obs_col = Obs,
                         ...,
-                        ittMax = 500L,
+                        itt_max = 500L,
                         eps = 1e-16) {
 
     assert_that(is_tibble(data) || is.data.frame(data))
-    assert_that(is.count(ittMax))
+    assert_that(is.count(itt_max))
     assert_that(is.number(eps), eps > 0)
 
-    extra_vars <- union(
-        group_vars(data),
-        tidyselect::vars_select(dplyr::tbl_vars(data), !!!enquos(...)))
+    extra_vars <-
+        union(
+            group_vars(data),
+            tidyselect::vars_select(dplyr::tbl_vars(data), !!!enquos(...)))
 
 
     indices <- group_indices(data)
     unique <- sort(unique(indices))
 
     idx <- map(unique, ~ which(indices == .x))
-    do_work_sigma_2_ex(data,
-                       as_name(ensym(date_col)),
-                       as_name(ensym(obs_col)),
-                       idx,
-                       extra_vars,
-                       eps,
-                       ittMax)
+
+    fsigma_2_(
+        data,
+        as_name(ensym(date_col)),
+        as_name(ensym(obs_col)),
+        idx,
+        extra_vars,
+        eps,
+        itt_max)
 }
 
-
-do_work_sigma_2_ex <- function(data, date_col, obs_col,
+#' @importFrom tibble as_tibble
+fsigma_2_ <- function(data, date_col, obs_col,
                             what,
                             extra_vars = NULL,
                             eps,
-                            ittMax) {
-    as_tibble(.Call("d2r_do_work_sigma_2_ex", data, date_col, obs_col,
-        what,
-        extra_vars,
-        eps,
-        ittMax))
+                            itt_max) {
+    as_tibble(
+        .Call(
+            "d2r_fsigma_2",
+            data, date_col, obs_col,
+            what,  extra_vars,
+            eps, itt_max))
 }
 
 
-#compile_src <- function() {
-    #cmds <- vec_c(
-                  #"rm src/*dll",
-                  #"rm src/*o",
-                  #"cd src && RCMD.exe SHLIB *cpp -o dipol_2_red.dll")
 
-    #map_int(cmds, shell)
-    #if(getLoadedDLLs() %>% names %>% str_detect("dipol_2_red") %>% any)
-        #dyn.unload("src/dipol_2_red.dll")
+#if (isNamespaceLoaded("rlang")) {
+    pth <- system.file("tests", "legacy_descriptor.dat",
+                    package = "Dipol2Red", mustWork = TRUE)
+    desc <- read_legacy_descriptor(pth)
 
-    #dyn.load("src/dipol_2_red.dll", local = FALSE)
+    data <- desc %>%
+        load_from_legacy_descriptor(
+            root = system.file(
+                "tests",
+                package = "Dipol2Red",
+                mustWork = TRUE)) %>%
+                imap(~mutate(.x, Test = 1:n() - 1L, Type = as_factor(.y))) %>%
+                RLibs::vec_rbind_uq %>%
+                group_by(Type)
+
+    #compile_src()
+    #fsigma_2(data, JD, Obj_1, Test) %>% print
+    #sigma_2(data, filter = "B", bandInfo = NULL, obs = Obj_1) %>% print
 #}
 
-##if (isNamespaceLoaded("rlang")) {
-    #pth <- system.file("tests", "legacy_descriptor.dat",
-                    #package = "Dipol2Red", mustWork = TRUE)
-    #desc <- read_legacy_descriptor(pth)
-
-    #data <- desc %>%
-        #load_from_legacy_descriptor(
-            #root = system.file(
-                #"tests",
-                #package = "Dipol2Red",
-                #mustWork = TRUE)) %>%
-                #imap(~mutate(.x, Test = 1:n() - 1L, Type = as_factor(.y))) %>%
-                #RLibs::vec_rbind_uq %>%
-                #group_by(Type)
-
-    ##compile_src()
-    ##sigma_2_ex(data, JD, Obj_1, Test) %>% print
-    ##sigma_2(data, filter = "B", bandInfo = NULL, obs = Obj_1) %>% print
-##}
-
-#microbenchmark::microbenchmark(
-    #cpp = sigma_2_ex(data, JD, Obj_1, Test),
-    #r = sigma_2(data, filter = "B", bandInfo = BandInfo, obs = Obj_1, Test),
-    #times = 20L) %>% print
+microbenchmark::microbenchmark(
+    cpp = fsigma_2(data, JD, Obj_1, Test),
+    r = sigma_2(data, filter = "B", bandInfo = BandInfo, obs = Obj_1, Test),
+    times = 50L) %>% print

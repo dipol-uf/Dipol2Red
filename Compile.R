@@ -33,8 +33,6 @@ if (interactive()) {
     library(glue)
     library(assertthat)
 
-    purrr::walk(fs::dir_ls("R", glob = "*R"), source)
-
     if (!exists("compile_src"))
         compile_src <<- function() {
             cmds <- vctrs::vec_c(
@@ -50,6 +48,7 @@ if (interactive()) {
         }
 
     compile_src()
+    purrr::walk(fs::dir_ls("R", glob = "*R"), source)
 } else {
 
     message("Running `roxygen2::roxygenize`...")
