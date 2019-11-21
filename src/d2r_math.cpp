@@ -176,7 +176,7 @@ avg_result average_single(
 	if (px.size() != 1 || py.size() != 1)
 		throw std::range_error("Vector of length > 1 provided where single values was expected.");
 
-	return std::make_tuple(0.0, 0.0, 0.0, 1, 1, 0.0, std::vector<double>(4, 0));
+	return std::make_tuple(px[0], py[0], 0.0, 1, 1, 0.0, std::vector<double>(4, 0));
 }
 
 avg_result average_multiple(
