@@ -1,7 +1,7 @@
 #' @useDynLib Dipol2Red
 #' @importFrom Rcpp       sourceCpp
 #' @importFrom vctrs      vec_c vec_rbind vec_is_empty vec_cast_common vec_size vec_recycle vec_recycle_common vec_slice
-#' @importFrom purrr      map imap map_chr keep reduce
+#' @importFrom purrr      map imap map_chr keep reduce flatten_chr discard
 #' @importFrom stringr    str_detect regex str_subset str_split
 #' @importFrom dplyr      %>% case_when group_vars group_indices arrange group_split
 #' @importFrom dplyr      pull mutate group_by summarise if_else n select tbl_vars

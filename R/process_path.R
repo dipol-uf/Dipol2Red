@@ -41,8 +41,8 @@ process_path <- function(path) {
         fs::path(pth, rels)
     }
 
-    c(".", paths) %>%
-        reduce(~map(.x, proc_dir, .y) %>% discard(~is.null(.x)) %>% flatten_chr)
+    vec_c(".", paths) %>%
+        reduce(~map(.x, proc_dir, .y) %>% discard(~is_null(.x)) %>% flatten_chr)
 }
 
 utils::globalVariables(c("Obj_1"))
