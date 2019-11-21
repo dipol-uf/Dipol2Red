@@ -9,4 +9,4 @@
 **/*vcxproj*
 **/*dll
 **/*o
-src/Makevars.win
+src/Makevars.win.dbg
