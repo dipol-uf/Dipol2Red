@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28010.2050
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{DA7A21FA-8162-4350-AD77-A8D1B671F3ED}") = "Dipol2Red", "Dipol2Red.rxproj", "{E7D6E38F-0000-4559-B65F-9D3A24566063}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NatimeImpl", "NatimeImpl\NatimeImpl.vcxproj", "{FEBB7F52-0D03-4AB0-90D8-B0031C17094F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NativeImpl", "NativeImpl\NativeImpl.vcxproj", "{FEBB7F52-0D03-4AB0-90D8-B0031C17094F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

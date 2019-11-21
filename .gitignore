@@ -5,7 +5,7 @@
 **/*Rcheck/*
 **/*tar.gz
 **/CSVs/*
-
+**/NativeImpl/*
 **/*vcxproj*
 **/*dll
 **/*o
