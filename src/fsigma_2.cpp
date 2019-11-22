@@ -100,7 +100,7 @@ SEXP d2r_fsigma_2(
 		const auto cols = extract_extra_cols(extra_cols, data_frame, idx_t);
 
 
-		std::vector<std::string> names{ x_col, "Px", "Py", "SG", "P", "A", "SG_A", "Itt", "N", "Ratio", "Q" };
+		std::vector<std::string> names{ x_col, "Px", "Py", "P", "SG", "A", "SG_A", "Itt", "N", "Ratio", "Q" };
 		List result(names.size() + extra_cols.size());
 		names.reserve(result.length());
 
