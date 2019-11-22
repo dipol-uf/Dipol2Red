@@ -51,6 +51,11 @@ void abs_diff(
 	double rhs,
 	std::vector<double> &result);
 
+void diff(
+	const std::vector<double> &lhs,
+	double rhs,
+	std::vector<double> &result);
+
 double weighted_sg(
 	const std::vector<double> &w,
 	const std::vector<double> &x,
@@ -58,10 +63,12 @@ double weighted_sg(
 	double sum_w);
 
 std::vector<double> make_cov(
-	const std::vector<double> &x,
-	const std::vector<double> &y,
+	const std::vector<double> &x0,
+	const std::vector<double> &y0,
 	const std::vector<double> &w_x,
-	const std::vector<double> &w_y);
+	const std::vector<double> &w_y,
+	double mean_px,
+	double mean_py);
 
 
 avg_result average_single(

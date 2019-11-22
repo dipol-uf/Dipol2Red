@@ -107,8 +107,18 @@ void abs_diff(
 
 	for (size_t i = 0; i < lhs.size(); i++)
 		result[i] = fabs(lhs[i] - rhs);
+}
 
-	return;
+void diff(
+	const std::vector<double> &lhs,
+	const double rhs,
+	std::vector<double> &result)
+{
+	if (lhs.size() != result.size())
+		throw std::range_error("Input vectors are of different sizes");
+
+	for (size_t i = 0; i < lhs.size(); i++)
+		result[i] = lhs[i] - rhs;
 }
 
 double weighted_sg(
@@ -131,29 +141,34 @@ double weighted_sg(
 }
 
 std::vector<double> make_cov(
-	const std::vector<double> &x,
-	const std::vector<double> &y,
+	const std::vector<double> &x0,
+	const std::vector<double> &y0,
 	const std::vector<double> &w_x,
-	const std::vector<double> &w_y)
+	const std::vector<double> &w_y,
+	const double mean_px,
+	const double mean_py)
 {
-	if(x.empty() || y.empty() || w_x.empty() || w_y.empty())
+	if(x0.empty() || y0.empty() || w_x.empty() || w_y.empty())
 	{
 		return std::vector<double>(4, 0.0);
 	}
-	const auto size = x.size();
-	if(size != y.size() || size != w_x.size() || size != w_y.size())
+	const auto size = x0.size();
+	if(size != y0.size() || size != w_x.size() || size != w_y.size())
 		throw std::range_error("Input vectors are of different sizes");
 
 	const auto w_x_sum = sum_(w_x);
 	const auto w_y_sum = sum_(w_y);
+	std::vector<double> x(size, 0.0);
+	std::vector<double> y(size, 0.0);
+	diff(x0, mean_px, x);
+	diff(y0, mean_py, y);
+
 
 	std::vector<double> w_xy(size);
 	for (size_t i = 0; i < size; i++)
 		w_xy[i] = sqrt(0.5 * (pow(w_x[i], 2) + pow(w_y[i], 2)));
 	
-	auto w_xy_sum = 0.0L;
-	for (size_t i = 0; i < size; i++)
-		w_xy_sum += w_xy[i];
+	const auto w_xy_sum = sum_(w_xy);
 
 	const auto w_x_corr = pow(w_x_sum, 2) - dot_prod_(w_x, w_x);
 	const auto w_y_corr = pow(w_y_sum, 2) - dot_prod(w_y, w_y);
@@ -259,7 +274,7 @@ avg_result average_multiple(
 	return std::make_tuple(mean_px, mean_py, sg, i,
 		static_cast<int>(size),
 		0.5 * n_w / static_cast<int>(size),
-		make_cov(px, py, wx, wy));
+		make_cov(px, py, wx, wy, mean_px, mean_py));
 }
 
 void correct_pol(

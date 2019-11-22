@@ -56,8 +56,8 @@ generate_Q <- function(p_x, p_y, w_x, w_y, p_x_mean, p_y_mean) {
 
     mtrx <- matrix(vec_c(
             w_x_sum * dot_prod(w_x, (x * x)) / w_x_corr,
-            w_xy_sum * dot_prod(sqrt(w_y ^ 2 + w_x ^ 2), (y * x)) / w_xy_corr,
-            w_xy_sum * dot_prod(sqrt(w_x ^ 2 + w_y ^ 2), (x * y)) / w_xy_corr,
+            w_xy_sum * dot_prod(sqrt(0.5 * (w_y ^ 2 + w_x ^ 2)), (y * x)) / w_xy_corr,
+            w_xy_sum * dot_prod(sqrt(0.5 * (w_x ^ 2 + w_y ^ 2)), (x * y)) / w_xy_corr,
             w_y_sum * dot_prod(w_y, (y * y)) / w_y_corr
         ), ncol = 2L)
 
