@@ -5,6 +5,13 @@ output:
 ---
 # `Dipol2Red`
 
+`Dipol2Red` is a package for reducing data obtained with a double-imaging polarimeter *Dipol-2* (and any later versions of *Dipol* family polarimeters).
+
+The input data are the differences (in magnitudes) between ordinary and extraordinary rays of a given target on the image and respective timestamps (or any other sortable numeric identifier). The data are generated as a result of subsequent observations with different phase plate angle (22.5 deg step). Every 16 measurement correspond to one full plate rotation, every 4 measurements produce one (independent polarization measurement).
+
+Such stream of `4n` data is transformed into polarization measurement. If no grouping is provided, all data are used to compute one average (over the whole data set).
+Alternatively, data can be grouped by `4m` subsequent observations (using `dplyr::group_by`), and the averaging procedure is applied to each group separately, providing the best control.
+
 ## Example usage
 ```{r}
 library(tibble, quietly = TRUE, warn.conflicts = FALSE)
@@ -13,6 +20,7 @@ library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
 ```
 
 - Simulating one observation with `1 %` polarization in `x` direction.
+4 measurements corresponding to plate angles 0, 22.5, 45, 67.5 deg.
     ```{r}
     x_1 <- tibble(
         JD = c(1, 2, 3, 4), 
