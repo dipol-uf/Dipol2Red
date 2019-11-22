@@ -23,28 +23,6 @@
 #   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-## TODO: copy to {RLibs}
-process_path <- function(path) {
-    path %>%
-        fs::path_norm %>%
-        str_split("/", simplify = TRUE) %>%
-        as.vector %>%
-        map_chr(glob2rx) -> paths
-
-    proc_dir <- function(pth, template) {
-        if (!fs::is_dir(pth))
-            return(NULL)
-        paths <- fs::dir_ls(pth)
-        rels <- fs::path_rel(paths, pth) %>%
-            str_subset(template)
-
-        fs::path(pth, rels)
-    }
-
-    vec_c(".", paths) %>%
-        reduce(~map(.x, proc_dir, .y) %>% discard(~is_null(.x)) %>% flatten_chr)
-}
-
 utils::globalVariables(c("Obj_1"))
 #' @title process_files
 #'
@@ -54,7 +32,7 @@ utils::globalVariables(c("Obj_1"))
 #' @return A list of tibbles
 #' @export
 process_files <- function(path,  by = 4L) {
-    files <- process_path(path)
+    files <- Sys.glob(path)
     files <- set_names(files, fs::path_file(files))
 
     proc <- function(loc_path) {
