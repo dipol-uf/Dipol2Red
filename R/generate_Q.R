@@ -48,7 +48,7 @@ generate_Q <- function(p_x, p_y, w_x, w_y, p_x_mean, p_y_mean) {
 
     w_x_sum <- sum(w_x)
     w_y_sum <- sum(w_y)
-    w_xy <- sqrt(0.5 * (w_x ^ 2 + w_y ^ 2))
+    w_xy <- sqrt(w_x ^ 2 + w_y ^ 2)
     w_xy_sum <- sum(w_xy)
 
     w_x_corr <- w_x_sum ^ 2 - sum(w_x ^ 2)

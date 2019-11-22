@@ -82,55 +82,32 @@ context("[Sigma_2] tests.")
 
 #})
 
-#test_that("[sigma_2] and [sigma_2_ex] do the same", {
+test_that("[sigma_2] and [sigma_2_ex] do the same", {
 
-    #data <- provide_test_data()
+    data <- provide_test_data()
 
-    #result <- map2_dfr(data$data, data$desc,
-        #~ sigma_2(
-            #data = .x,
-            #filter = dplyr::filter(data$band_info, ID == .y$Filter)$Filter,
-            #band_info = data$band_info %>% mutate_at(vars(Px, Py, Angle), ~ 0 * .),
-            #obs = Obj_1))
+    result <- map2_dfr(data$data, data$desc,
+        ~ sigma_2(
+            data = .x,
+            filter = dplyr::filter(data$band_info, ID == .y$Filter)$Filter,
+            band_info = data$band_info %>% mutate_at(vars(Px, Py, Angle), ~ 0 * .),
+            obs = Obj_1))
 
-    #result_2 <- map_dfr(data$data,
-        #~ fsigma_2(
-            #data = .x,
-            #obs = Obj_1))
+    result_2 <- map_dfr(data$data,
+        ~ fsigma_2(
+            data = .x,
+            obs = Obj_1))
 
-    ## Exact equality is achieved
-    #expect_equal(result$Px, result_2$Px)
-    #expect_equal(result$Py, result_2$Py)
-    #expect_equal(result$SG, result_2$SG)
-    #expect_equal(result$JD, result_2$JD)
-    #expect_equal(result$A, result_2$A)
-#})
+    # Exact equality is achieved
+    expect_equal(result$Px, result_2$Px)
+    expect_equal(result$Py, result_2$Py)
+    expect_equal(result$SG, result_2$SG)
+    expect_equal(result$JD, result_2$JD)
+    expect_equal(result$A, result_2$A)
+    expect_true(all(map2_lgl(result$Q, result_2$Q, all.equal)))
+})
 
-#test_that("[sigma_2] and [sigma_2_ex] do the same (with corrections)", {
-    #data <- provide_test_data()
-
-    #result <- map2_dfr(data$data, data$desc,
-        #~ sigma_2(
-            #data = .x,
-            #filter = dplyr::filter(data$band_info, ID == .y$Filter)$Filter,
-            #band_info = data$band_info,
-            #obs = Obj_1))
-
-    #result_2 <- map2_dfr(data$data, data$desc,
-        #function(x, y) {
-            #temp <- dplyr::filter(data$band_info, ID == y$Filter)
-            #fsigma_2(x, obs = Obj_1) %>%
-                #correct_pol(temp$Px, temp$Py, temp$Angle)
-        #})
-    ## Exact equality is achieved
-    #expect_equal(result$Px, result_2$Px)
-    #expect_equal(result$Py, result_2$Py)
-    #expect_equal(result$SG, result_2$SG)
-    #expect_equal(result$JD, result_2$JD)
-    #expect_equal(result$A, result_2$A)
-#})
-
-test_that("[sigma_2] and [sigma_2_ex] produce Q", {
+test_that("[sigma_2] and [sigma_2_ex] do the same (with corrections)", {
     data <- provide_test_data()
 
     result <- map2_dfr(data$data, data$desc,
@@ -146,15 +123,11 @@ test_that("[sigma_2] and [sigma_2_ex] produce Q", {
             fsigma_2(x, obs = Obj_1) %>%
                 correct_pol(temp$Px, temp$Py, temp$Angle)
         })
-
-    print(result)
-    print(result_2)
-    print(result$Q)
-    print(result_2$Q)
     # Exact equality is achieved
-    #expect_equal(result$Px, result_2$Px)
-    #expect_equal(result$Py, result_2$Py)
-    #expect_equal(result$SG, result_2$SG)
-    #expect_equal(result$JD, result_2$JD)
-    #expect_equal(result$A, result_2$A)
+    expect_equal(result$Px, result_2$Px)
+    expect_equal(result$Py, result_2$Py)
+    expect_equal(result$SG, result_2$SG)
+    expect_equal(result$JD, result_2$JD)
+    expect_equal(result$A, result_2$A)
+    expect_true(all(map2_lgl(result$Q, result_2$Q, all.equal)))
 })

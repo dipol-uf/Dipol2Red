@@ -166,7 +166,7 @@ std::vector<double> make_cov(
 
 	std::vector<double> w_xy(size);
 	for (size_t i = 0; i < size; i++)
-		w_xy[i] = sqrt(0.5 * (pow(w_x[i], 2) + pow(w_y[i], 2)));
+		w_xy[i] = sqrt(pow(w_x[i], 2) + pow(w_y[i], 2));
 	
 	const auto w_xy_sum = sum_(w_xy);
 
@@ -175,7 +175,7 @@ std::vector<double> make_cov(
 
 	auto w_xy_corr = pow(w_xy_sum, 2);
 	for (size_t i = 0; i < size; i++)
-		w_xy_corr -= 0.5 * (pow(w_x[i], 2) + pow(w_y[i], 2));
+		w_xy_corr -= pow(w_xy[i], 2);
 
 	std::vector<double> result(4, 0.0);
 	result[0] = static_cast<double>(w_x_sum * dot_prod_(w_x, x, x) / w_x_corr);
