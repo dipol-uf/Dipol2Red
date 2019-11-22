@@ -24,9 +24,9 @@
 #   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 utils::globalVariables(vctrs::vec_c(
-                       "Obs", "Id", "JD", "Q", "sQ", "PX", "PY",
-                       "mPX", "mPY", ".", "dX", "WX", "dY", "WY",
-                       "mJD", "Px", "Py", "SGx", "SGy", "SG", "P",
+                       "Obs", "Id", "JD", "Q", "sQ", "vec_px", "vec_py",
+                       "mean_px", "mean_py", ".", "dx", "wx", "dy", "wy",
+                       "mean_jd", "Px", "Py", "SGx", "SGy", "SG", "P",
                        "NW", "A", "STD", "SG_A", "Cov", "N", "Ratio",
                        "Itt", "Angle", ".x", "BandInfo"))
 #' @title sigma_2
@@ -91,8 +91,8 @@ sigma_2 <- function(data,
     assert_that(is_tibble(band_info))
 
     band_info %<>% filter(Filter == filter)
-    p0 <- band_info %>% extract(1L, vec_c("Px", "Py")) %>% flatten_dbl
-    a0 <- band_info %>% slice(1) %>% pull(Angle)
+    p0 <- flatten_dbl(extract(band_info, 1L, vec_c("Px", "Py")))
+    a0 <- extract2(band_info, 1, "Angle")
 
     if (is_grouped_df(data))
         result <- data %>%
@@ -141,7 +141,7 @@ do_work_sigma_2 <- function(data, date, obs, p0, a0,
     std <- 0
     delta <- 1e100
 
-    summ_expr <- list(mJD = quo(mean(JD)), sQ = quo(sum(Q)), PX = quo(get_px(Q) / sQ), PY = quo(get_py(Q) / sQ))
+    summ_expr <- list(mean_jd = quo(mean(JD)), sQ = quo(sum(Q)), vec_px = quo(get_px(Q) / sQ), vec_py = quo(get_py(Q) / sQ))
     if (!is_empty(extra_vars) && is_character(extra_vars)) {
         preserve_vars <- extra_vars %>% set_names(.) %>% map(~quo((!!sym(.x))[1]))
     }
@@ -154,53 +154,46 @@ do_work_sigma_2 <- function(data, date, obs, p0, a0,
         mutate(Id = (1L:n() - 1L) %/% n_obs_per_measure + 1L) %>%
         group_by(Id)
 
-    prepared_data <- transformed_data %>%
-        summarise(!!!summ_expr, !!!preserve_vars) %>%
-        mutate(PX = PX - p0[1], PY = PY - p0[2])
+    prepared_data <- summarise(transformed_data, !!!summ_expr, !!!preserve_vars)
 
     if (vec_size(prepared_data) == 1L) {
         result <- prepared_data %>%
-            rename(JD = mJD, Px = PX, Py = PY) %>%
-            mutate(SG = 0, SG_A = 0, Cov = 0, N = 1L, Ratio = 0, Itt = 1L) %>%
-            mutate(
+            rename(JD = mean_jd, Px = vec_px, Py = vec_py) %>%
+            mutate(SG = 0, SG_A = 0, Cov = 0, N = 1L, Ratio = 0, Itt = 1L,
                 P = sqrt(Px ^ 2L + Py ^ 2L),
                 A = (90 / pi * atan2(Py, Px) + a0) %% 180,
-                Q = list(matrix(vec_recycle(NA_real_, 4L), ncol = 2L))) 
+                Q = list(matrix(vec_recycle(NA_real_, 4L), ncol = 2L)))
     }
 
     else
         for (i in seq_len(itt_max)) {
-            result <- prepared_data %>%
-                mutate(WX = 1, WY = 1) %>%
-                mutate(mPX = px_mean, mPY = py_mean) %>%
-                mutate(dX = abs(PX - mPX), dY = abs(PY - mPY)) %>% {
-                    if (i > 1L) {
-                        mutate(., WX = if_else(dX > 2 * std,
-                            1 / (2 * dX / std - 3) ^ 2, WX)) %>%
-                        mutate(WX = if_else(WX < 0.11, 0, WX)) %>%
-                        mutate(WY = if_else(dY > 2 * std,
-                            1 / (2 * dY / std - 3) ^ 2, WY)) %>%
-                        mutate(WY = if_else(WY < 0.11, 0, WY))
-                    }
-                    else
-                        .
-                } %>%
+            w_result <-
+                mutate(prepared_data,
+                    wx = 1, wy = 1,
+                    mean_px = px_mean, mean_py = py_mean,
+                    dx = abs(vec_px - mean_px), dy = abs(vec_py - mean_py))
+
+            if (i > 1L) {
+                w_result <-
+                    mutate(w_result,
+                        wx = case_when(
+                            dx > 3 * std ~ 0,
+                            dx > 2 * std ~ 1 / (2 * dx / std - 3) ^ 2,
+                            TRUE ~ 1),
+                        wy = case_when(
+                            dy > 3 * std ~ 0,
+                            dy > 2 * std ~ 1 / (2 * dy / std - 3) ^ 2,
+                            TRUE ~ 1))
+            }
+
+            result <- w_result %>%
                 summarise(
-                    JD = mean(mJD),
-                    NW = sum(sum(WX < 1), sum(WY < 1)),
-                    Px = dot_prod(WX, PX) / sum(WX),
-                    Py = dot_prod(WY, PY) / sum(WY),
-                    P = sqrt(Px ^ 2 + Py ^ 2),
-                    A = (90 / pi * atan2(Py, Px) + a0) %% 180,
-                    SGx = dot_prod(WX, c(Px - PX) ^ 2) / sum(WX),
-                    SGy = dot_prod(WY, c(Py - PY) ^ 2) / sum(WY),
-                    SG = sqrt((SGx + SGy) / (sum(WX) + sum(WY) - 2L)),
-                    SG_A = 90 / pi * atan2(SG, P),
-                    Q = list(generate_Q(PX, PY, WX, WY, Px, Py)),
-                    STD = SG * sqrt((sum(WX) + sum(WY)) / 2),
-                    Ratio = 0.5 * NW / nrow(.),
-                    N = n(), Itt = i,
-                    !!!preserve_vars)
+                    Px = dot_prod(wx, vec_px) / sum(wx),
+                    Py = dot_prod(wy, vec_py) / sum(wy),
+                    SGx = dot_prod(wx, c(Px - vec_px) ^ 2) / sum(wx),
+                    SGy = dot_prod(wy, c(Py - vec_py) ^ 2) / sum(wy),
+                    SG = sqrt((SGx + SGy) / (sum(wx) + sum(wy) - 2L)),
+                    STD = SG * sqrt((sum(wx) + sum(wy)) / 2))
 
             delta <- sqrt(
                         ((mean(px_mean) - result$Px) ^ 2 +
@@ -210,10 +203,28 @@ do_work_sigma_2 <- function(data, date, obs, p0, a0,
             px_mean <- vec_recycle(result$Px, vec_size(px_mean))
             py_mean <- vec_recycle(result$Py, vec_size(py_mean))
 
-            std <- result %>% pull(STD)
+            std <- pull(result, STD)
 
-            if (delta <= eps)
+            if (delta <= eps) {
+                result <-
+                    mutate(result,
+                        Px = Px - p0[1],
+                        Py = Py - p0[2],
+                        JD = mean(w_result$mean_jd),
+                        P = sqrt(Px ^ 2 + Py ^ 2),
+                        A = (90 / pi * atan2(Py, Px) + a0) %% 180,
+                        SG_A = 90 / pi * atan2(SG, P),
+                        Itt = i,
+                        Q = list(generate_Q(
+                            w_result$vec_px, w_result$vec_py,
+                            w_result$wx, w_result$wy,
+                            result$Px, result$Py)),
+                        Ratio = 0.5 * sum(sum(w_result$wx < 1), sum(w_result$wy < 1)) / vec_size(w_result),
+                        N = vec_size(w_result)) %>%
+                    vec_cbind(summarise(w_result, !!!preserve_vars))
+
                 break
+            }
 
         }
 
