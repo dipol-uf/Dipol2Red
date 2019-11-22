@@ -39,9 +39,9 @@ library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
     ```
     
         ## # A tibble: 1 x 11
-        ##      JD    Px    Py    SG     P     A  SG_A   Itt     N Ratio Q            
+        ##      JD    Px    Py     P    SG     A  SG_A   Itt     N Ratio Q            
         ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <int> <int> <dbl> <list>       
-        ## 1   2.5 1.000     0     0 1.000     0     0     1     1     0 <dbl[,2] [2 ~
+        ## 1   2.5 1.000     0 1.000     0     0     0     1     1     0 <dbl[,2] [2 ~
 
   - Simulating total polarization of `1 %` and equal `x` and `y`
     components.
@@ -54,9 +54,9 @@ library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
     ```
     
         ## # A tibble: 1 x 11
-        ##      JD    Px    Py    SG     P     A  SG_A   Itt     N Ratio Q            
+        ##      JD    Px    Py     P    SG     A  SG_A   Itt     N Ratio Q            
         ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <int> <int> <dbl> <list>       
-        ## 1  12.5 0.707 0.707     0 1.000  22.5     0     1     1     0 <dbl[,2] [2 ~
+        ## 1  12.5 0.707 0.707 1.000     0  22.5     0     1     1     0 <dbl[,2] [2 ~
 
   - Combining two datasets to obtain average over several observations.
     
@@ -66,9 +66,9 @@ library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
     ```
     
         ## # A tibble: 1 x 11
-        ##      JD    Px    Py    SG     P     A  SG_A   Itt     N Ratio Q            
+        ##      JD    Px    Py     P    SG     A  SG_A   Itt     N Ratio Q            
         ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <int> <int> <dbl> <list>       
-        ## 1   7.5 0.854 0.354 0.271 0.924  11.2  8.16     2     2     0 <dbl[,2] [2 ~
+        ## 1   7.5 0.854 0.354 0.924 0.271  11.2  8.16     2     2     0 <dbl[,2] [2 ~
 
   - Assigning groups, separating observations by `Run`. Recreates two
     original measurements. `fsigma_2` automatically detects grouping
@@ -81,7 +81,7 @@ library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
     ```
     
         ## # A tibble: 2 x 12
-        ##      JD    Px    Py    SG     P     A  SG_A   Itt     N Ratio Q       Run  
+        ##      JD    Px    Py     P    SG     A  SG_A   Itt     N Ratio Q       Run  
         ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <int> <int> <dbl> <list>  <fct>
-        ## 1   2.5 1.000 0         0 1.000   0       0     1     1     0 <dbl[,~ First
-        ## 2  12.5 0.707 0.707     0 1.000  22.5     0     1     1     0 <dbl[,~ Seco~
+        ## 1   2.5 1.000 0     1.000     0   0       0     1     1     0 <dbl[,~ First
+        ## 2  12.5 0.707 0.707 1.000     0  22.5     0     1     1     0 <dbl[,~ Seco~
