@@ -36,7 +36,7 @@ if (interactive()) {
                 "rm src/*o",
                 "cd src && RCMD.exe SHLIB *cpp -o dipol_2_red.dll")
 
-            purrr::map_int(cmds, shell)
+            #purrr::map_int(cmds, shell)
             if (getLoadedDLLs() %>% names %>% stringr::str_detect("dipol_2_red") %>% any)
                 dyn.unload("src/dipol_2_red.dll")
 

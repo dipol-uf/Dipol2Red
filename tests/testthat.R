@@ -27,11 +27,12 @@ library(testthat)
 if (interactive()) {
     library(assertthat)
     library(vctrs)
-    #library(tidyverse)
     library(magrittr)
     extract <- magrittr::extract
     testthat::test_dir(fs::path("tests", "testthat"))
-} else{
+} else {
+    library(assertthat)
+    library(vctrs)
     library(Dipol2Red)
     library(dplyr)
     library(purrr)
