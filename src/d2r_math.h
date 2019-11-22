@@ -73,3 +73,14 @@ avg_result average_multiple(
 	const std::vector<double> &py,
 	double eps,
 	int itt_max);
+
+void correct_pol(
+	std::vector<double> &px,
+	std::vector<double> &py,
+	std::vector<double> &p,
+	std::vector<double> &a,
+	std::vector<double> &sg_a,
+	const std::vector<double> &sg,
+	double px_corr,
+	double py_corr,
+	double angle_corr);

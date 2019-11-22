@@ -40,6 +40,7 @@ RcppExport SEXP d2r_fsigma_2(
 	SEXP eps,
 	SEXP itt_max);
 
+
 void mag_2_px_py(
 	const Rcpp::NumericVector &data,
 	const Rcpp::IntegerVector &range,
@@ -56,7 +57,11 @@ Rcpp::NumericVector average_arg(
 	const Rcpp::List &idx);
 
 
-void postprocess_pol(Rcpp::List &input);
+void postprocess_pol(
+	Rcpp::List &input,
+	double px_corr,
+	double py_corr,
+	double angle_corr);
 
 avg_result sigma_2(
 	const Rcpp::NumericVector &data,

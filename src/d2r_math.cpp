@@ -28,6 +28,8 @@
 constexpr auto std_init = 1e-100;
 
 namespace {
+	const long double pi = 4 * atanl(1.0);
+	
 	long double sum_(const std::vector<double> &input)
 	{
 		if (input.empty())
@@ -258,4 +260,29 @@ avg_result average_multiple(
 		static_cast<int>(size),
 		0.5 * n_w / static_cast<int>(size),
 		make_cov(px, py, wx, wy));
+}
+
+void correct_pol(
+	std::vector<double> &px,
+	std::vector<double> &py,
+	std::vector<double> &p,
+	std::vector<double> &a,
+	std::vector<double> &sg_a,
+	const std::vector<double> &sg,
+	double px_corr,
+	double py_corr,
+	double angle_corr)
+{
+	const auto size = px.size();
+	if (py.size() != size || sg.size() != size || p.size() != size || a.size() != size || sg_a.size() != size)
+		throw std::range_error("Input size mismatch.");
+
+	for(size_t i = 0; i < size; i++)
+	{
+		px[i] += px_corr;
+		py[i] += py_corr;
+		a[i] = fmod(90.0 / pi  * atan2(py[i], px[i]) + angle_corr, 180.0);
+		p[i] = sqrt(pow(px[i], 2) + pow(py[i], 2));
+		sg_a[i] = 90.0 / pi * atan2(sg[i], p[i]);
+	}
 }

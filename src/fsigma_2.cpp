@@ -56,8 +56,10 @@ SEXP d2r_fsigma_2(
 	SEXP itt_max)
 {
 	if (Rf_inherits(input, "data.frame") != TRUE)
-		forward_rcpp_exception_to_r(exception("`input` is of unsupported type."));
-	try {
+		Rf_error("Input should be of type `data.frame` or compatible.");
+
+	try 
+	{
 		const auto data_frame = as<DataFrame>(input);
 		const auto x_col = as<std::string>(as<CharacterVector>(date_col)[0]);
 		const auto y_col = as<std::string>(as<CharacterVector>(obs_col)[0]);
@@ -119,7 +121,7 @@ SEXP d2r_fsigma_2(
 		for (const auto &it : extra_cols)
 			result[it] = cols[it];
 
-		postprocess_pol(result);
+		postprocess_pol(result, 0.0, 0.0, 0.0);
 
 		return result;
 	}
@@ -218,22 +220,24 @@ List extract_extra_cols(
 	return result;
 }
 
-void postprocess_pol(List &input)
+void postprocess_pol(
+	List &input,
+	const double px_corr,
+	const double py_corr,
+	const double angle_corr)
 {
-	const auto px = as<std::vector<double>>(input["Px"]);
-	const auto py = as<std::vector<double>>(input["Py"]);
+	auto px = as<std::vector<double>>(input["Px"]);
+	auto py = as<std::vector<double>>(input["Py"]);
 	const auto sg = as<std::vector<double>>(input["SG"]);
 
 	std::vector<double> a(px.size());
 	std::vector<double> p(px.size());
 	std::vector<double> sg_a(px.size());
 
-	for (size_t i = 0; i < px.size(); i++)
-	{
-		a[i] = fmod(90.0 / PI * atan2(py[i], px[i]), 180.0);
-		p[i] = sqrt(pow(px[i], 2) + pow(py[i], 2));
-		sg_a[i] = 90.0 / PI * atan2(sg[i], p[i]);
-	}
+	correct_pol(px, py, p, a, sg_a, sg, px_corr, py_corr, angle_corr);
+	
+	input["Px"] = wrap(px);
+	input["Py"] = wrap(py);
 	input["A"] = wrap(a);
 	input["P"] = wrap(p);
 	input["SG_A"] = wrap(sg_a);
