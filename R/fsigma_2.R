@@ -67,6 +67,14 @@ fsigma_2 <- function(data,
         itt_max)
 }
 
+correct_pol <- function(data, px = 0, py = 0, angle = 0) {
+    assert_that(is_tibble(data) || is.data.frame(data))
+    assert_that(is.number(px))
+    assert_that(is.number(py))
+    assert_that(is.number(angle))
+    correct_pol_(data, px, py, angle)
+}
+
 fsigma_2_ <- function(data, date_col, obs_col,
                             what,
                             extra_vars = NULL,
@@ -78,4 +86,12 @@ fsigma_2_ <- function(data, date_col, obs_col,
             data, date_col, obs_col,
             what,  extra_vars,
             eps, itt_max))
+}
+
+
+correct_pol_ <- function(data, px = 0, py = 0, angle = 0) {
+    as_tibble(
+        .Call(
+            "d2r_correct_pol",
+            data, px, py, angle))
 }

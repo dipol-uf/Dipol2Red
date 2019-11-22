@@ -279,8 +279,8 @@ void correct_pol(
 
 	for(size_t i = 0; i < size; i++)
 	{
-		px[i] += px_corr;
-		py[i] += py_corr;
+		px[i] -= px_corr;
+		py[i] -= py_corr;
 		a[i] = fmod(90.0 / pi  * atan2(py[i], px[i]) + angle_corr, 180.0);
 		p[i] = sqrt(pow(px[i], 2) + pow(py[i], 2));
 		sg_a[i] = 90.0 / pi * atan2(sg[i], p[i]);

@@ -27,7 +27,6 @@ if (interactive()) {
     library(magrittr)
     library(rlang)
     library(vctrs)
-    library(glue)
     library(assertthat)
 
     if (!exists("compile_src"))

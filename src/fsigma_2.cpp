@@ -45,7 +45,6 @@ void debug_print(const std::vector<T> &input)
 	Rcout << " ]" << std::endl << std::endl;
 }
 
-// [[Rcpp:export]]
 SEXP d2r_fsigma_2(
 	SEXP input,
 	SEXP date_col,
@@ -134,6 +133,43 @@ SEXP d2r_fsigma_2(
 		forward_exception_to_r(ex);
 	}
 	catch(...)
+	{
+		Rf_error("Unknown error");
+	}
+	return R_NilValue;
+}
+
+
+SEXP d2r_correct_pol(
+	SEXP data,
+	SEXP px_corr,
+	SEXP py_corr,
+	SEXP angle_corr)
+{
+	if (Rf_inherits(data, "data.frame") != TRUE
+		&& Rf_inherits(data, "list") != TRUE)
+		Rf_error("Input should be of type `data.frame`, `list`, or compatible.");
+	
+	try
+	{
+		auto list_rep = as<List>(data);
+		const auto px = as<double>(px_corr);
+		const auto py = as<double>(py_corr);
+		const auto angle = as<double>(angle_corr);
+
+		postprocess_pol(list_rep, px, py, angle);
+
+		return list_rep;
+	}
+	catch (exception &r_ex)
+	{
+		forward_rcpp_exception_to_r(r_ex);
+	}
+	catch (std::exception &ex)
+	{
+		forward_exception_to_r(ex);
+	}
+	catch (...)
 	{
 		Rf_error("Unknown error");
 	}

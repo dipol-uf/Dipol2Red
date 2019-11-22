@@ -40,6 +40,11 @@ RcppExport SEXP d2r_fsigma_2(
 	SEXP eps,
 	SEXP itt_max);
 
+RcppExport SEXP d2r_correct_pol(
+	SEXP data,
+	SEXP px_corr,
+	SEXP py_corr,
+	SEXP angle_corr);
 
 void mag_2_px_py(
 	const Rcpp::NumericVector &data,
