@@ -8,3 +8,4 @@ NativeImpl.*
 ^.*src.*dll$
 ^.*src.*o$
 ^.*src.*so$
+^.*ps-scripts.*$

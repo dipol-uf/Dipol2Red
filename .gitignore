@@ -11,4 +11,4 @@
 **/*o
 src/Makevars.win.dbg
 src/Makevars.win.tmp*
-
+**/ps-scripts/*
