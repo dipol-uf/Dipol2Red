@@ -34,9 +34,13 @@ if (interactive()) {
             cmds <- vctrs::vec_c(
                 "rm src/*dll",
                 "rm src/*o",
-                "cd src && RCMD.exe SHLIB *cpp -o dipol_2_red.dll")
+                "mv src/Makevars.win src/Makevars.win.cache",
+                "mv src/Makevars.win.dbg src/Makevars.win",
+                "cd src && RCMD.exe SHLIB *cpp -o dipol_2_red.dll",
+                "mv src/Makevars.win src/Makevars.win.dbg",
+                "mv src/Makevars.win.cache src/Makevars.win")
 
-            #purrr::map_int(cmds, shell)
+            purrr::map_int(cmds, shell)
             if (getLoadedDLLs() %>% names %>% stringr::str_detect("dipol_2_red") %>% any)
                 dyn.unload("src/dipol_2_red.dll")
 
@@ -51,7 +55,7 @@ if (interactive()) {
     roxygen2::roxygenize(".")
     message("Finished `roxygen2::roxygenize`...")
 
-    is_win <- grepl("win(dows)?", Sys.info()["sysname"])
+    is_win <- grepl("[Ww]in(dows)?", Sys.info()["sysname"])
     if (is.na(is_win))
         stop("Unable to detect system. Run `R CMD build` manually.")
     sfx <- ifelse(is_win, ".exe", "")
@@ -59,7 +63,7 @@ if (interactive()) {
 
     message(paste("Executing:", cmd_1))
     if (is_win)
-        shell(cmd_1, must_wrok = TRUE)
+        shell(cmd_1, mustWork = TRUE)
     else
         system(cmd_1)
 
@@ -82,7 +86,7 @@ if (interactive()) {
     cmd_2 <- sprintf("R%s CMD check %s", sfx, latest_pckg)
     message(paste("Executing:", cmd_2))
     if (is_win)
-        shell(cmd_2, must_wrok = TRUE)
+        shell(cmd_2, mustWork = TRUE)
     else
         system(cmd_2)
 }

@@ -43,8 +43,8 @@ process_files <- function(path,  by = 4L) {
             fix_names -> data
 
         nms <- names(data)
-        obj_names <- str_subset(nms, "Obj_\\d+")
-        ref_names <- str_subset(nms, "Ref_\\d+")
+        obj_names <- str_subset(nms, "^Obj_\\d+$")
+        ref_names <- str_subset(nms, "^Ref_\\d+$")
 
         ref_names %>%
             keep(~sqrt(sum(data[[.x]] ^ 2) / vec_size(data)) > .Machine$double.eps) %>%

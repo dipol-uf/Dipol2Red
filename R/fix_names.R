@@ -22,7 +22,7 @@
 #   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 #   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-utils::globalVariables(vctrs::vec_c("Obj", "Name", "Src", "Result"))
+utils::globalVariables(vctrs::vec_c("Obj", "Name", "Src", "Result", "Desc"))
 
 #' @title fix_names
 #' @rdname fix_names
@@ -38,9 +38,13 @@ fix_names <- function(x) {
 #' @export
 fix_names.character <- function(x) {
     x %>%
-        str_match(regex("(jd|mjd|date|filter|ref|obj)(\\d+)?", ignore_case = TRUE)) %>%
-        as_tibble(.name_repair = ~vec_c("Match", "Name", "Id")) %>%
+        str_match(regex("(jd|mjd|date|filter|ref|obj)(\\d+)?(?:\\s*:\\s*(.*)$)?", ignore_case = TRUE)) %>%
+        as_tibble(.name_repair = ~vec_c("Match", "Name", "Id", "Desc"))  %>%
         mutate(
+            Desc = if_else(
+                str_detect(Desc, "[Mm]agnitude(?:\\s*\\([Cc]entroid\\))?") | is.na(Desc),
+                "",
+                paste0("_(", str_replace(Desc, "\\s+", "_"), ")")),
             Name = tolower(Name),
             Src = x,
             Id = if_else(nzchar(Id) & !is.na(Id), paste0("_", Id), "")) %>%
@@ -51,7 +55,7 @@ fix_names.character <- function(x) {
                 Name == "ref" ~ "Ref",
                 Name == "filter" ~ "Filter",
                 TRUE ~ Src)) %>%
-        mutate(Result = paste0(Name, Id)) %>%
+        mutate(Result = paste0(Name, Id, Desc)) %>%
         pull(Result)
 }
 
