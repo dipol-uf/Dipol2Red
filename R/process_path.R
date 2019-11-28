@@ -71,7 +71,7 @@ process_files <- function(path,  by = 4L) {
         data %>%
             mutate(Id = as_factor((1:n() - 1L) %/% (4L * by))) %>%
             group_by(Id) %>%
-            fsigma_2(date_col = JD, obs_col = Obj_1) %>%
+            fsigma_2(date_col = JD, obs_col = !!nm) %>%
             select(Id, JD, Px, Py, P, SG, A, SG_A, N, Ratio) -> result_individual
 
         return(
