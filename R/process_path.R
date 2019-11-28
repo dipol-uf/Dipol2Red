@@ -39,7 +39,7 @@ process_files <- function(path,  by = 4L) {
         # Currently read only csv
         #fs::path_ext(pth) -> ext
         loc_path %>%
-            read_csv(col_types = cols()) %>%
+            read_csv(col_types = cols(), comment = "#") %>%
             fix_names -> data
 
         nms <- names(data)
@@ -59,8 +59,13 @@ process_files <- function(path,  by = 4L) {
             mutate(data, !!!q) -> data
         }
 
+        if (vec_in("DeltaMag", names(data)))
+            nm <- sym("DeltaMag")
+        else
+            nm <- sym("Obj_1")
+
         data %>%
-            fsigma_2(date_col = JD, obs_col = Obj_1) %>%
+            fsigma_2(date_col = JD, obs_col = !!nm) %>%
             select(JD, Px, Py, P, SG, A, SG_A, N, Ratio) -> result_full
 
         data %>%

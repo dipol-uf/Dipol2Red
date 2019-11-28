@@ -8,7 +8,7 @@
 #' @importFrom dplyr      transmute group_map is_grouped_df bind_cols bind_rows one_of
 #' @importFrom forcats    as_factor
 #' @importFrom rlang      as_name enquo !! !!! is_null as_function enquos is_double set_names
-#' @importFrom rlang      is_empty is_character syms quo is_missing ensym is_integer
+#' @importFrom rlang      is_empty is_character syms quo is_missing ensym is_integer sym
 #' @importFrom utils      glob2rx
 #' @importFrom magrittr   %<>% extract extract2 subtract
 #' @importFrom assertthat assert_that is.string is.number is.count is.readable
