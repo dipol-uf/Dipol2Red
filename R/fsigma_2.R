@@ -67,6 +67,15 @@ fsigma_2 <- function(data,
         itt_max)
 }
 
+#' correct_pol
+#'
+#' @param data Input \code{tibble} in \code{sigma_2}/\code{fsigma_2}-compatible format.
+#' @param px Correction to \code{Px}.
+#' @param py Correction to \code{Py}.
+#' @param angle Correction to angle.
+#'
+#' @return Updated table.
+#' @export
 correct_pol <- function(data, px = 0, py = 0, angle = 0) {
     assert_that(is_tibble(data) || is.data.frame(data))
     assert_that(is.number(px))

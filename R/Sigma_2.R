@@ -214,6 +214,8 @@ do_work_sigma_2 <- function(data, date, obs, p0, a0,
                         P = sqrt(Px ^ 2 + Py ^ 2),
                         A = (90 / pi * atan2(Py, Px) + a0) %% 180,
                         SG_A = 90 / pi * atan2(SG, P),
+                        Px = P * cos(A * pi / 90),
+                        Py = P * sin(A * pi / 90),
                         Itt = i,
                         Q = list(generate_Q(
                             w_result$vec_px, w_result$vec_py,
