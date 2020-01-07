@@ -49,7 +49,7 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
     nu1 <- temp_n[1] - 1L
     nu2 <- temp_n[2] - 1L
     k <- 2L
-    S <- 1.0 / (nu1 + nu2) * (nu1 * sigma1 + nu2 * sigma2)
+    S <- 1.0 / (nu1 + nu2) * (nu1 * sigma1[[1]] + nu2 * sigma2[[1]])
 
     I_S <- solve(S)
 
