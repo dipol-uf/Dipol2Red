@@ -39,19 +39,13 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
     assert_that(is_tibble(data))
     assert_that(vec_size(data) == 2L)
 
-    p_x <- ensym(p_x)
-    p_y <- ensym(p_y)
-    sg <- ensym(sg)
-    cov <- ensym(cov)
-    n <- ensym(n)
+    mean1 <- data %>% slice(1L) %>% select({{ p_x }}, {{ p_y }}) %>% flatten_dbl
+    mean2 <- data %>% slice(2L) %>% select({{ p_x }}, {{ p_y }}) %>% flatten_dbl
 
-    mean1 <- data %>% select(!!p_x, !!p_y) %>% slice(1L) %>% flatten_dbl
-    mean2 <- data %>% select(!!p_x, !!p_y) %>% slice(2L) %>% flatten_dbl
+    sigma1 <- data %>% slice(1L) %>% pull({{ cov }})
+    sigma2 <- data %>% slice(2L) %>% pull(cov)
 
-    sigma1 <- data %>% extract2(1, cov)
-    sigma2 <- data %>% extract2(2, cov)
-
-    temp_n <- pull(data, !!n)
+    temp_n <- pull(data, {{ n }})
     nu1 <- temp_n[1] - 1L
     nu2 <- temp_n[2] - 1L
     k <- 2L

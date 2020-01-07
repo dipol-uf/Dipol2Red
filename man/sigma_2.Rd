@@ -5,15 +5,33 @@
 \alias{Sigma_2}
 \title{sigma_2}
 \usage{
-sigma_2(data, filter = "B", band_info = NULL, ..., itt_max = 500L,
-  eps = 1e-16, date = JD, obs = Obs,
+sigma_2(
+  data,
+  filter = "B",
+  band_info = NULL,
+  ...,
+  itt_max = 500L,
+  eps = 1e-16,
+  date = JD,
+  obs = Obs,
   eqtrialCorrFactor = lifecycle::deprecated(),
-  bandInfo = lifecycle::deprecated(), ittMax = lifecycle::deprecated())
+  bandInfo = lifecycle::deprecated(),
+  ittMax = lifecycle::deprecated()
+)
 
-Sigma_2(data, filter = "B", band_info = NULL, ..., itt_max = 500L,
-  eps = 1e-16, date = JD, obs = Obs,
+Sigma_2(
+  data,
+  filter = "B",
+  band_info = NULL,
+  ...,
+  itt_max = 500L,
+  eps = 1e-16,
+  date = JD,
+  obs = Obs,
   eqtrialCorrFactor = lifecycle::deprecated(),
-  bandInfo = lifecycle::deprecated(), ittMax = lifecycle::deprecated())
+  bandInfo = lifecycle::deprecated(),
+  ittMax = lifecycle::deprecated()
+)
 }
 \arguments{
 \item{data}{Input data in form of a \code{tibble}.}
