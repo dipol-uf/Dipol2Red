@@ -43,7 +43,7 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
     mean2 <- data %>% slice(2L) %>% select({{ p_x }}, {{ p_y }}) %>% flatten_dbl
 
     sigma1 <- data %>% slice(1L) %>% pull({{ cov }})
-    sigma2 <- data %>% slice(2L) %>% pull(cov)
+    sigma2 <- data %>% slice(2L) %>% pull({{ cov }})
 
     temp_n <- pull(data, {{ n }})
     nu1 <- temp_n[1] - 1L
