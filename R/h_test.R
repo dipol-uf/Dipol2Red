@@ -55,7 +55,7 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
 
     XY <- mean1 - mean2
 
-    T2 <- temp_n[1] * temp_n[2] * dot_prod(t(XY), I_S %*% (XY)) / (temp_n[1] + temp_n[2])
+    T2 <- temp_n[1] * temp_n[2] * as.numeric(t(XY) %*% I_S %*% (XY)) / (temp_n[1] + temp_n[2])
     f <- (temp_n[1] + temp_n[2] - 1 - k) * T2 / ((temp_n[1] + temp_n[2] - 2) * k)
     d1 <- k
     d2 <- temp_n[1] + temp_n[2] - 1L - k
@@ -119,7 +119,7 @@ h_test2 <- function(left, right, ..., id, px = Px, py = Py, n = N, q = Q) {
         q <- ((n1 - 1L) * q1 + (n2 - 1L) * q2) / (n1 + n2 - 2L)
         s <- solve(q)
         df <- x1 - x2
-
+        
         t2 <- (t(df) %*% s %*% df) * n1 * n2 / (n1 + n2)
 
         df1 <- 2L
