@@ -116,6 +116,17 @@ h_test2 <- function(left, right, ..., id, px = Px, py = Py, n = N, q = Q) {
         acc <- acc_gen(dt)
         map(1:2, acc) %->% c(x1, x2)
 
+        q <- ((n1 - 1L) * q1 + (n2 - 1L) * q2) / (n1 + n2 - 2L)
+        s <- solve(q)
+        df <- x1 - x2
+
+        t2 <- (t(df) %*% s %*% df) * n1 * n2 / (n1 + n2)
+
+        df1 <- 2L
+        df2 <- n1 + n2 - df1 - 1L
+
+        f <- df2 * t2 / (n1 + n2 - 2L) / df1
+
     })
 }
 
