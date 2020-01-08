@@ -70,3 +70,52 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
         "lg(1-p)" = lgp_inv,
         "d1" = d1, "d2" = d2, "n" = temp_n[1] + temp_n[2]))
 }
+
+h_test2 <- function(left, right, ..., id, px = Px, py = Py, n = N, q = Q) {
+    assert_that(is_tibble(left))
+    assert_that(is_tibble(right))
+    assert_that(vec_size(left) == vec_size(right))
+
+    extra_cols <- ensyms(...)
+
+    if (is_missing(id)) {
+        # No `id` column for joining, using row numbers
+        select(left, {{ px }}, {{ py }}, {{ n }}, {{ q }}, !!!extra_cols) -> left
+        select(right, {{ px }}, {{ py }}, {{ n }}, {{ q }}, !!!extra_cols) -> right
+        if (vec_in("rowid", names(left)))
+            abort(
+                "`rowid` column is already present, provide custom joining `id`",
+                "dipol2red_invalid_argument")
+
+        left <- rowid_to_column(left)
+        right <- rowid_to_column(right)
+        id <- sym("rowid")
+    }
+    else {
+        select(left, {{ id }}, {{ px }}, {{ py }}, {{ n }}, {{ q }}, !!!extra_cols) -> left
+        select(right, {{ id }}, {{ px }}, {{ py }}, {{ n }}, {{ q }}, !!!extra_cols) -> right
+    }
+
+    bind_rows(left, right) %>%
+        group_split({{ id }}) -> grouped_data
+
+    if (some(grouped_data, ~ vec_size(.x) != 2L)) {
+        # Ids are not unique, pairwise joining failed
+        abort(
+            "Ids should be unique and identify one row in each table",
+            "dipol2red_invalid_argument")
+    }
+
+    acc_gen <- function(input)
+        compose(~slice(input, .x), ~ select(.x, {{ px }}, {{ py }}), flatten_dbl, .dir = "forward")
+
+    map(grouped_data, function(dt) {
+        pull(dt, {{ n }}) %->% c(n1, n2)
+        pull(dt, {{ q }}) %->% c(q1, q2)
+
+        acc <- acc_gen(dt)
+        map(1:2, acc) %->% c(x1, x2)
+
+    })
+}
+
