@@ -28,6 +28,7 @@ if (interactive()) {
     library(assertthat)
     library(vctrs)
     library(magrittr)
+    library(zeallot)
     extract <- magrittr::extract
     testthat::test_dir(fs::path("tests", "testthat"))
 } else {
@@ -39,5 +40,6 @@ if (interactive()) {
     library(magrittr)
     library(rlang)
     library(readr)
+    library(zeallot)
     testthat::test_check("Dipol2Red", reporter = default_reporter())
 }

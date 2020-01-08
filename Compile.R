@@ -23,11 +23,15 @@
 #   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 if (interactive()) {
-    library(tidyverse)
+    library(dplyr)
+    library(tidyr)
+    library(purrr)
+    library(tibble)
     library(magrittr)
     library(rlang)
     library(vctrs)
     library(assertthat)
+    library(zeallot)
 
     if (!exists("compile_src"))
         compile_src <<- function() {

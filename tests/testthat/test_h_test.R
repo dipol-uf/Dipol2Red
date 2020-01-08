@@ -30,3 +30,19 @@ provide_test_data <- function() {
 
     return(list(P1 = readRDS(pth_1), P2 = readRDS(pth_2)))
 }
+
+context("[h_test] and [h_test2]")
+test_that("[h_test] produces correct results", {
+    provide_test_data() %>%
+        imap_dfr(~mutate(.x, Group = as_factor(.y))) %>%
+        group_split(Filter) %>%
+        set_names(map_chr(., ~ as.character(.x$Filter)[1])) %>%
+        map(h_test) %>%
+        imap_dfr(~mutate(.x, Filter = as_factor(.y))) -> test_results
+
+    # Preliminary incorrect results
+    # TODO : Update with reevaluated comparison values
+    expect_equal(
+        c(-1.59658, -0.09215, -0.03641),
+        round(pull(test_results, `lg(p)`), 5))
+})
