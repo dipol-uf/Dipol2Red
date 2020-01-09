@@ -25,10 +25,6 @@
 
 library(testthat)
 if (interactive()) {
-    library(assertthat)
-    library(vctrs)
-    library(magrittr)
-    library(zeallot)
     extract <- magrittr::extract
     testthat::test_dir(fs::path("tests", "testthat"))
 } else {

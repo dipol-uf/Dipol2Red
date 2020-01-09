@@ -36,13 +36,52 @@ test_that("[h_test] produces correct results", {
     provide_test_data() %>%
         imap_dfr(~mutate(.x, Group = as_factor(.y))) %>%
         group_split(Filter) %>%
-        set_names(map_chr(., ~ as.character(.x$Filter)[1])) %>%
+        set_names(map_chr(., ~ vec_slice(.x$Filter, 1L))) %>%
         map(h_test) %>%
         imap_dfr(~mutate(.x, Filter = as_factor(.y))) -> test_results
 
-    # Preliminary incorrect results
-    # TODO : Update with reevaluated comparison values
     expect_equal(
-        c(-1.59658, -0.09215, -0.03641),
-        round(pull(test_results, `lg(p)`), 5))
+        c(-0.00003, -0.15496, -0.02110),
+        pull(test_results, `lg(p)`),
+        tolerance = 1e-5)
+})
+
+test_that("Id-less [h_test2] produces correct results", {
+    provide_test_data() %->% c(p1, p2)
+
+    h_test2(p1, p2, Filter) -> test_results
+
+    expect_equal(
+        c(-0.00003, -0.15496, -0.02110),
+        pull(test_results, `lg(p)`),
+        tolerance = 1e-5)
+})
+
+test_that("Custom id [h_test2] produces correct results", {
+    provide_test_data() %->% c(p1, p2)
+
+    mutate(p1, ID = as_factor(letters[1:n()])) %>% slice_sample(n = vec_size(.)) -> p1
+    mutate(p2, ID = as_factor(letters[1:n()])) %>% slice_sample(n = vec_size(.)) -> p2
+
+    h_test2(p1, p2, Filter, id = ID) -> test_results
+
+    expect_equal(
+        c(-0.00003, -0.15496, -0.02110),
+        pull(test_results, `lg(p)`),
+        tolerance = 1e-5)
+})
+
+test_that("[h_test] and [h_test2] produce same results", {
+    provide_test_data() %>%
+        imap_dfr(~mutate(.x, Group = as_factor(.y))) %>%
+        group_split(Filter) %>%
+        set_names(map_chr(., ~ vec_slice(.x$Filter, 1L))) %>%
+        map(h_test) %>%
+        imap_dfr(~mutate(.x, Filter = as_factor(.y))) -> test_results_1
+
+    provide_test_data() %->% c(p1, p2)
+
+    h_test2(p1, p2, Filter) -> test_results_2
+
+    expect_equal(pull(test_results_1, `lg(p)`), pull(test_results_2, `lg(p)`))
 })

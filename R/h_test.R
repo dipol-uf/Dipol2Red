@@ -71,6 +71,24 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
         "d1" = d1, "d2" = d2, "n" = temp_n[1] + temp_n[2]))
 }
 
+utils::globalVariables(c(
+    "1-p", "T^2", "d1", "d2", 
+    "lg(1-p)", "lg(p)",
+     "n1", "n2", "q1", "q2", "x1", "x2"))
+
+#' @title h_test2
+#'
+#' @param left,right Equal-sized \code{data.frame}s for pairwise testing
+#' @param ... Additional columns to include to the output.
+#' Value from the \code{left} \code{data.frame} is included.
+#' @param id Id column to match entries. If absent, row numbers are used
+#' (\code{tibble::rowid_to_column}).
+#' @param px,py Column that contains value of Stokes \code{q} and \code{u}, present in both tables/
+#' @param n Column that contains number of data points used to average.
+#' @param q Column that contains the specific covariance matrix (as \code{list} of \code{matrix})
+#'
+#' @return A \code{data.frame} with test results
+#' @export
 h_test2 <- function(left, right, ..., id, px = Px, py = Py, n = N, q = Q) {
     assert_that(is_tibble(left))
     assert_that(is_tibble(right))
