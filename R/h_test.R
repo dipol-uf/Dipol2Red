@@ -78,7 +78,7 @@ h_test2 <- function(left, right, ..., id, px = Px, py = Py, n = N, q = Q) {
 
     extra_cols <- ensyms(...)
 
-    if (is_missing(id)) {
+    if (is_missing(ensym(id))) {
         # No `id` column for joining, using row numbers
         select(left, {{ px }}, {{ py }}, {{ n }}, {{ q }}, !!!extra_cols) -> left
         select(right, {{ px }}, {{ py }}, {{ n }}, {{ q }}, !!!extra_cols) -> right
