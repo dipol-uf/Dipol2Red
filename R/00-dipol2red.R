@@ -35,8 +35,6 @@
 #' @importFrom readr      read_csv cols read_lines parse_integer
 #'
 #' @importFrom utils      tail
-#'
-#' @importFrom zeallot    %->%
 
 
 NULL

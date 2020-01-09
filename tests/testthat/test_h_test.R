@@ -27,8 +27,8 @@ provide_test_data <- function() {
                     package = "Dipol2Red", mustWork = TRUE)
     pth_2 <- system.file("tests", "p2.rds",
                     package = "Dipol2Red", mustWork = TRUE)
-
-    return(list(P1 = readRDS(pth_1), P2 = readRDS(pth_2)))
+    res <- list(P1 = readRDS(pth_1), P2 = readRDS(pth_2))
+    return(map(res, mutate_at, vars(Q), as_list_of))
 }
 
 context("[h_test] and [h_test2]")
@@ -48,6 +48,14 @@ test_that("[h_test] produces correct results", {
 
 test_that("Id-less [h_test2] produces correct results", {
     provide_test_data() %->% c(p1, p2)
+
+    q <- sym("Q")
+    bind_rows(p1, p2) %>%
+        group_split(Filter) %>%
+        map(function(d) {
+            pull(d, {{ q }}) %->% c(q1, q2)
+        }) %>%
+        print
 
     h_test2(p1, p2, Filter) -> test_results
 

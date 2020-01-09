@@ -71,6 +71,8 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
         "d1" = d1, "d2" = d2, "n" = temp_n[1] + temp_n[2]))
 }
 
+
+
 utils::globalVariables(c(
     "1-p", "T^2", "d1", "d2", 
     "lg(1-p)", "lg(p)",
@@ -129,7 +131,8 @@ h_test2 <- function(left, right, ..., id, px = Px, py = Py, n = N, q = Q) {
 
     map_dfr(grouped_data, function(dt) {
         pull(dt, {{ n }}) %->% c(n1, n2)
-        pull(dt, {{ q }}) %->% c(q1, q2)
+        #print(pull(dt, {{ q }})  %->% c(qq1, qq2))
+        pull(dt, {{ q }}) %>% as.list %->% c(q1, q2)
 
         acc <- acc_gen(dt)
         map(1:2, acc) %->% c(x1, x2)
