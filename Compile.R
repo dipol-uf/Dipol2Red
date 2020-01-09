@@ -34,7 +34,6 @@ if (interactive()) {
     library(rlang)
     library(vctrs)
     library(assertthat)
-    library(zeallot)
 
     if (!exists("compile_src"))
         compile_src <<- function() {
@@ -49,7 +48,7 @@ if (interactive()) {
 
             if (getLoadedDLLs() %>% names %>% stringr::str_detect("dipol_2_red") %>% any)
                 dyn.unload("src/dipol_2_red.dll")
-            #purrr::map_int(cmds, shell)
+            purrr::map_int(cmds, shell)
 
             dyn.load("src/dipol_2_red.dll", local = FALSE)
         }

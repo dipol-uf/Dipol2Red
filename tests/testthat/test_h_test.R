@@ -47,14 +47,9 @@ test_that("[h_test] produces correct results", {
 })
 
 test_that("Id-less [h_test2] produces correct results", {
-    provide_test_data() %->% c(p1, p2)
-
-    q <- sym("Q")
-    bind_rows(p1, p2) %>%
-        group_split(Filter) %>%
-        map(function(d) {
-            pull(d, {{ q }}) %->% c(q1, q2)
-        })
+    provide_test_data() -> tmp
+    p1 <- tmp[[1]]
+    p2 <- tmp[[2]]
 
     h_test2(p1, p2, Filter) -> test_results
 
@@ -65,7 +60,9 @@ test_that("Id-less [h_test2] produces correct results", {
 })
 
 test_that("Custom id [h_test2] produces correct results", {
-    provide_test_data() %->% c(p1, p2)
+    provide_test_data() -> tmp
+    p1 <- tmp[[1]]
+    p2 <- tmp[[2]]
 
     mutate(p1, ID = as_factor(letters[1:n()])) %>% slice_sample(n = vec_size(.)) -> p1
     mutate(p2, ID = as_factor(letters[1:n()])) %>% slice_sample(n = vec_size(.)) -> p2
@@ -86,7 +83,9 @@ test_that("[h_test] and [h_test2] produce same results", {
         map(h_test) %>%
         imap_dfr(~mutate(.x, Filter = as_factor(.y))) -> test_results_1
 
-    provide_test_data() %->% c(p1, p2)
+    provide_test_data() -> tmp
+    p1 <- tmp[[1]]
+    p2 <- tmp[[2]]
 
     h_test2(p1, p2, Filter) -> test_results_2
 
