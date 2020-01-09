@@ -47,9 +47,9 @@ if (interactive()) {
                 "mv src/Makevars.win src/Makevars.win.dbg",
                 "mv src/Makevars.win.cache src/Makevars.win")
 
-            purrr::map_int(cmds, shell)
             if (getLoadedDLLs() %>% names %>% stringr::str_detect("dipol_2_red") %>% any)
                 dyn.unload("src/dipol_2_red.dll")
+            #purrr::map_int(cmds, shell)
 
             dyn.load("src/dipol_2_red.dll", local = FALSE)
         }

@@ -85,8 +85,7 @@ test_that("[Sigma_2] handles column names", {
 
 })
 
-test_that("[sigma_2] and [sigma_2_ex] do the same", {
-
+test_that("[sigma_2] and [fsigma_2] do the same", {
     data <- provide_test_data()
 
     result <- map2_dfr(data$data, data$desc,
@@ -100,7 +99,7 @@ test_that("[sigma_2] and [sigma_2_ex] do the same", {
         ~ fsigma_2(
             data = .x,
             obs = Obj_1))
-
+    
     # Exact equality is achieved
     expect_equal(result$Px, result_2$Px)
     expect_equal(result$Py, result_2$Py)
@@ -110,7 +109,7 @@ test_that("[sigma_2] and [sigma_2_ex] do the same", {
     expect_true(all(map2_lgl(result$Q, result_2$Q, all.equal)))
 })
 
-test_that("[sigma_2] and [sigma_2_ex] do the same (with corrections)", {
+test_that("[sigma_2] and [fsigma_2] do the same (with corrections)", {
     data <- provide_test_data()
 
     result <- map2_dfr(data$data, data$desc,
@@ -135,7 +134,7 @@ test_that("[sigma_2] and [sigma_2_ex] do the same (with corrections)", {
     expect_true(all(map2_lgl(result$Q, result_2$Q, all.equal)))
 })
 
-test_that("[sigma_2] and [sigma_2_ex] grouped data", {
+test_that("[sigma_2] and [fsigma_2] grouped data", {
     data <- provide_test_data()
     data$data %>%
         imap(~mutate(.x, Group = factor(.y), Type = letters[.y])) %>% { vec_rbind(!!!.) } %>%

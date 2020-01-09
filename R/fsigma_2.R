@@ -57,14 +57,16 @@ fsigma_2 <- function(data,
 
     idx <- map(unique, ~ which(indices == .x))
 
-    fsigma_2_(
-        data,
-        as_name(ensym(date_col)),
-        as_name(ensym(obs_col)),
-        idx,
-        extra_vars,
-        eps,
-        itt_max)
+    mutate(
+        fsigma_2_(
+            data,
+            as_name(ensym(date_col)),
+            as_name(ensym(obs_col)),
+            idx,
+            extra_vars,
+            eps,
+            itt_max),
+        Q = as_list_of(Q))
 }
 
 #' correct_pol

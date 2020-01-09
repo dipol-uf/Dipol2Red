@@ -162,7 +162,7 @@ do_work_sigma_2 <- function(data, date, obs, p0, a0,
             mutate(SG = 0, SG_A = 0, Cov = 0, N = 1L, Ratio = 0, Itt = 1L,
                 P = sqrt(Px ^ 2L + Py ^ 2L),
                 A = (90 / pi * atan2(Py, Px) + a0) %% 180,
-                Q = list(matrix(vec_recycle(NA_real_, 4L), ncol = 2L)))
+                Q = list_of(matrix(vec_recycle(NA_real_, 4L), ncol = 2L)))
     }
 
     else
@@ -217,13 +217,13 @@ do_work_sigma_2 <- function(data, date, obs, p0, a0,
                         Px = P * cos(A * pi / 90),
                         Py = P * sin(A * pi / 90),
                         Itt = i,
-                        Q = list(generate_Q(
+                        Q = list_of(generate_Q(
                             w_result$vec_px, w_result$vec_py,
                             w_result$wx, w_result$wy,
                             result$Px, result$Py)),
                         Ratio = 0.5 * sum(sum(w_result$wx < 1), sum(w_result$wy < 1)) / vec_size(w_result),
                         N = vec_size(w_result)) %>%
-                    vec_cbind(summarise(w_result, !!!preserve_vars))
+                    bind_cols(summarise(w_result, !!!preserve_vars))
 
                 break
             }
