@@ -71,10 +71,8 @@ h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
         "d1" = d1, "d2" = d2, "n" = temp_n[1] + temp_n[2]))
 }
 
-
-
 utils::globalVariables(c(
-    "1-p", "T^2", "d1", "d2", 
+    "1-p", "T^2", "d1", "d2",
     "lg(1-p)", "lg(p)",
      "n1", "n2", "q1", "q2", "x1", "x2"))
 
@@ -131,8 +129,7 @@ h_test2 <- function(left, right, ..., id, px = Px, py = Py, n = N, q = Q) {
 
     map_dfr(grouped_data, function(dt) {
         pull(dt, {{ n }}) %->% c(n1, n2)
-        #print(pull(dt, {{ q }})  %->% c(qq1, qq2))
-        pull(dt, {{ q }}) %>% as.list %->% c(q1, q2)
+        pull(dt, {{ q }}) %->% c(q1, q2)
 
         acc <- acc_gen(dt)
         map(1:2, acc) %->% c(x1, x2)
@@ -168,4 +165,26 @@ h_test2 <- function(left, right, ..., id, px = Px, py = Py, n = N, q = Q) {
                    `T^2`, `f`, `p`, `1-p`, `lg(p)`, `lg(1-p)`, `d1`, `d2`, `n`,
                    !!!extra_cols)
     })
+}
+
+
+`%->%` <- function(lhs, rhs) {
+    deconstructor(lhs, {{ rhs }})
+}
+
+`%<-%` <- function(lhs, rhs) {
+    deconstructor(rhs, {{lhs}})
+}
+
+deconstructor <- function(what, into) {
+    q <- enquo(into)
+    env <- quo_get_env(q)
+    expr <- as.list(quo_get_expr(q))
+
+    assert_that(expr[[1]] == sym("c"), msg = "Only `c` can be used to combine names")
+    names <- expr[-1]
+
+    assert_that(vec_size(what) == vec_size(names), msg = "LHS and RHS should have equal length")
+
+    walk2(what, names, ~assign(as.character(.y), .x, envir = env))
 }

@@ -54,8 +54,7 @@ test_that("Id-less [h_test2] produces correct results", {
         group_split(Filter) %>%
         map(function(d) {
             pull(d, {{ q }}) %->% c(q1, q2)
-        }) %>%
-        print
+        })
 
     h_test2(p1, p2, Filter) -> test_results
 

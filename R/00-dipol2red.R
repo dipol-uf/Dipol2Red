@@ -18,7 +18,7 @@
 #'
 #' @importFrom rlang      as_name enquo !! !!! is_null as_function enquos is_double set_names
 #' @importFrom rlang      is_empty is_character syms quo is_missing ensym is_integer sym abort
-#' @importFrom rlang      ensyms
+#' @importFrom rlang      ensyms quo_get_env quo_get_expr
 #'
 #' @importFrom utils      glob2rx
 #'
