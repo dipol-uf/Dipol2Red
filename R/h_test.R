@@ -109,7 +109,7 @@ h_test2 <- function(left, right, ..., id, px = Px, py = Py, n = N, q = Q) {
     acc_gen <- function(input)
         compose(~slice(input, .x), ~ select(.x, {{ px }}, {{ py }}), flatten_dbl, .dir = "forward")
 
-    map(grouped_data, function(dt) {
+    map_dfr(grouped_data, function(dt) {
         pull(dt, {{ n }}) %->% c(n1, n2)
         pull(dt, {{ q }}) %->% c(q1, q2)
 
@@ -119,14 +119,32 @@ h_test2 <- function(left, right, ..., id, px = Px, py = Py, n = N, q = Q) {
         q <- ((n1 - 1L) * q1 + (n2 - 1L) * q2) / (n1 + n2 - 2L)
         s <- solve(q)
         df <- x1 - x2
-        
-        t2 <- (t(df) %*% s %*% df) * n1 * n2 / (n1 + n2)
+
+        t2 <- as.numeric(t(df) %*% s %*% df) * n1 * n2 / (n1 + n2)
 
         df1 <- 2L
         df2 <- n1 + n2 - df1 - 1L
 
         f <- df2 * t2 / (n1 + n2 - 2L) / df1
 
+        p <- pf(f, df1, df2)
+        p_inv <- pf(f, df1, df2, lower.tail = FALSE)
+        lgp <- pf(f, df1, df2, log.p = TRUE) / log(10)
+        lgp_inv <- pf(f, df1, df2, lower.tail = FALSE, log.p = TRUE) / log(10)
+
+        slice(dt, 1L) %>%
+            transmute({{ id }},
+                "T^2" = t2, "f" = f,
+                "p" = p, "1-p" = p_inv,
+                "lg(p)" = lgp,
+                "lg(1-p)" = lgp_inv,
+                "d1" = df1, "d2" = df2, "n" = n1 + n2,
+                 !!!extra_cols) %>%
+        # Temprorary solution to the column order issue present 
+        # in `transmute` of the dev version of {dplyr}
+        # https://github.com/tidyverse/dplyr/issues/4717
+            select({{ id }},
+                   `T^2`, `f`, `p`, `1-p`, `lg(p)`, `lg(1-p)`, `d1`, `d2`, `n`,
+                   !!!extra_cols)
     })
 }
-
