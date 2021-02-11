@@ -45,6 +45,12 @@ jobs:
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
         shell: Rscript {0}
 
+      - name: Cache installed R packages
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/packages.Rds') }}
+          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
       
       - name: Install dependencies
         run: |
@@ -53,17 +59,10 @@ jobs:
           remotes::install_deps(pkgdir = ".", dependencies = TRUE)
         shell: Rscript {0}
         
-      - name: Cache installed R packages
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/packages.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
-        
       - name: Build & Check package
         id: integration_tests
         run: |
-          rcmdcheck::rcmdcheck(path = ".", args = c("--no-manual"), error_on = "warning", check_dir = "check")
+          rcmdcheck::rcmdcheck(path = ".", args = c("--no-manual", "--as-cran", "--force-multiarch"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
         
       - name: Upload check results from R integration tests

@@ -7,12 +7,6 @@ on:
       - 'v*'
     paths-ignore:
       - 'README.md'
-  pull_request:
-    branches: [ master ]
-    tags-ignore: 
-      - 'v*'
-    paths-ignore:
-      - 'README.md'
   workflow_dispatch:
 
 jobs:
@@ -38,12 +32,6 @@ jobs:
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
         shell: Rscript {0}
 
-      
-      - name: Install dependencies
-        run: |
-          remotes::install_cran("rmarkdown")
-          remotes::install_local(".", dependencies = TRUE)
-        shell: Rscript {0}
         
       - name: Cache installed R packages
         uses: actions/cache@v2
@@ -51,6 +39,12 @@ jobs:
           path: ${{ env.R_LIBS_USER }}
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/packages.Rds') }}
           restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+      
+      - name: Install dependencies
+        run: |
+          remotes::install_cran("rmarkdown")
+          remotes::install_local(".", dependencies = TRUE)
+        shell: Rscript {0}
         
       - name: Generate README
         run: |
