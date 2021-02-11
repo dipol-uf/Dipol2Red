@@ -4,14 +4,16 @@
 \name{BandInfo}
 \alias{BandInfo}
 \title{BandInfo}
-\format{A tibble with 5 variables and 3 rows adequate for 2018 season.}
+\format{
+A tibble with 5 variables and 3 rows adequate for 2018 season.
+}
 \description{
 \itemize{
-     \item ID. Filter ID as used by legacy soft
-     \item Filter. Filter name
-     \item Angle. Zero-point poision angle of each filter
-     \item Px. Instrumental polarization in X axis
-     \item Py. Instrumental polarization in Y axis
- }
+\item ID. Filter ID as used by legacy soft
+\item Filter. Filter name
+\item Angle. Zero-point poision angle of each filter
+\item Px. Instrumental polarization in X axis
+\item Py. Instrumental polarization in Y axis
+}
 }
 \keyword{dataset}
