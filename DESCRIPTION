@@ -1,8 +1,13 @@
 Package: Dipol2Red
-Title: Dipol-2 data reduction pipeline
+Title: Dipol-2 Data Reduction Pipeline
 Version: 0.7.1
-Authors@R: c(person("Ilia", "Kosenkov", email = "ilia.kosenkov.at.gm@gmail.com", role = c("aut", "cre")),
-             person("Vilppu", "Piirola", role = "aut"))
+Authors@R: c(
+    person(
+        "Ilia", "Kosenkov", 
+        role = c("aut", "cre"),
+        email = "ilia.kosenkov@outlook.com",
+        comment = c(ORCID = "0000-0001-5563-7840")),
+    person("Vilppu", "Piirola", role = "aut"))
 Description: Provides tools to process .csv output of the Dipol-2 image reduction routine.
 Depends: R (>= 3.5)
 LinkingTo: Rcpp
@@ -26,5 +31,8 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 ByteCompile: true
-RoxygenNote: 7.0.2
+URL: https://github.com/dipol-uf/Dipol2Red
+BugReports: https://github.com/dipol-uf/Dipol2Red/issues
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7..1
 Suggests: testthat
