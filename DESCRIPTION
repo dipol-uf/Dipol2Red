@@ -34,5 +34,5 @@ ByteCompile: true
 URL: https://github.com/dipol-uf/Dipol2Red
 BugReports: https://github.com/dipol-uf/Dipol2Red/issues
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7..1
+RoxygenNote: 7.1.1
 Suggests: testthat
