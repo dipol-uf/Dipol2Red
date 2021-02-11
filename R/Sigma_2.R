@@ -6,7 +6,7 @@
 sigma_2 <- function(...) {
   lifecycle::deprecate_stop(
     when = "0.8.0",
-    what = "sigma_2()",
-    with = "fsigma_2()"
+    what = "Dipol2Red::sigma_2()",
+    with = "Dipol2Red::fsigma_2()"
   )
 }

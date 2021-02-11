@@ -1,9 +1,10 @@
 #' @useDynLib Dipol2Red
 #' @importFrom Rcpp       sourceCpp
 #'
-#' @importFrom vctrs      vec_c vec_in vec_rbind vec_is_empty vec_cast_common vec_size
-#' @importFrom vctrs      vec_recycle vec_recycle_common vec_slice vec_cbind list_of as_list_of
-#'
+#' @importFrom vctrs      vec_c vec_in vec_rbind vec_is_empty vec_size
+#' @importFrom vctrs      vec_recycle vec_recycle_common vec_slice vec_cbind
+#' @importFrom vctrs      vec_cast list_of as_list_of vec_cast_common
+#' 
 #' @importFrom purrr      map imap map_chr keep reduce flatten_chr flatten_dbl discard map_if
 #' @importFrom purrr      walk2 map2_chr map_at some map_dfr compose
 #'
@@ -34,8 +35,6 @@
 #' @importFrom stats      pf
 #'
 #' @importFrom readr      read_csv cols read_lines parse_integer
-#'
-#' @importFrom utils      tail
 #'
 #' @importFrom glue       glue glue_collapse
 NULL
