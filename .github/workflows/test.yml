@@ -62,7 +62,7 @@ jobs:
       - name: Build & Check package
         id: integration_tests
         run: |
-          rcmdcheck::rcmdcheck(path = ".", args = c("--no-manual"), error_on = "warning", check_dir = "check")
+          rcmdcheck::rcmdcheck(path = ".", args = c("--no-manual", "--as-cran", "--force-multiarch"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
         
       - name: Upload check results from R integration tests
