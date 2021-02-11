@@ -16,9 +16,10 @@
 #'
 #' @importFrom forcats    as_factor
 #'
-#' @importFrom rlang      as_name enquo !! !!! is_null as_function enquos is_double set_names
-#' @importFrom rlang      is_empty is_character syms quo is_missing ensym is_integer sym abort
-#' @importFrom rlang      ensyms quo_get_env quo_get_expr
+#' @importFrom rlang      as_name enquo !! !!! is_null as_function enquos
+#' @importFrom rlang      is_empty is_character syms quo is_missing ensym
+#' @importFrom rlang      ensyms quo_get_env quo_get_expr set_names sym abort
+#' @importFrom rlang      is_double is_integer
 #'
 #' @importFrom utils      glob2rx
 #'
@@ -35,6 +36,37 @@
 #' @importFrom readr      read_csv cols read_lines parse_integer
 #'
 #' @importFrom utils      tail
-
-
+#'
+#' @importFrom glue       glue glue_collapse
 NULL
+
+has_crayon <- function() {
+  requireNamespace("crayon", quietly = TRUE) &&
+    crayon::has_color()
+}
+
+err_invalid_arg <- function() "Invalid function argument."
+
+err_cross <- function() {
+  if (has_crayon()) {
+    crayon::red("x")
+  } else {
+    "x"
+  }
+}
+
+err_info <- function() {
+  if (has_crayon()) {
+    crayon::yellow("i")
+  } else {
+    "i"
+  }
+}
+
+err_ok <- function() {
+  if (has_crayon()) {
+    crayon::green("v")
+  } else {
+    "v"
+  }
+}
