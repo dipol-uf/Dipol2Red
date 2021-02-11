@@ -1,54 +1,60 @@
-#   MIT License
-#
-#   Copyright(c) 2018
-#   Ilia Kosenkov [ilia.kosenkov.at.gm@gmail.com],
-#   Vilppu Piirola
-#
-#   Permission is hereby granted, free of charge, to any person obtaining a copy
-#   of this software and associated documentation files(the "Software"), to deal
-#   in the Software without restriction, including without limitation the rights
-#   to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-#   copies of the Software, and to permit persons to whom the Software is
-#   furnished to do so, subject to the following conditions:
-#
-#   The above copyright notice and this permission
-#   notice shall be included in all
-#   copies or substantial portions of the Software.
-#
-#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-#   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-#   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-#   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
-#   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-#' @title ReadLegacyDescriptor
+#' Read legacy descriptor
 #' @param path Path to the descriptor file (e.g. \code{Vin.txt})
-#' @aliases read_legacy_descriptor
 #' @export
-ReadLegacyDescriptor <- function(path) {
-    assert_that(is.readable(path))
+read_legacy_descriptor <- function(path) {
+  if (
+    !fs::file_access(
+      vec_cast(path, to = fs::path(), x_arg = "path"),
+      c("exists", "readable")
+    )
+  ) {
+    abort(
+      paste(
+        err_invalid_arg(),
+        paste(
+          err_cross(),
+          "`path` should point to a readable file."
+        ),
+        paste(
+          err_info(),
+          "Make sure that file exists and is not blocked",
+          "by another process."
+        ),
+        sep = "\n "
+      ),
+      class = "d2r_invalid_arg"
+    )
+  }
 
-    lines <- read_lines(path)
+  lines <- read_lines(path)
 
-    if ((vec_size(lines) - 1L) %% 2L != 0L)
-        stop("Incorrect number of lines in the input file.")
+  if ((vec_size(lines) - 1L) %% 2L != 0L) {
+    abort(
+      paste(
+        "Invalid file contents.",
+        paste(
+          err_cross(),
+          "File is incorrectly formatted."
+        ),
+        glue(
+          err_info(),
+          " Expected odd number of lines, got `{vec_size(lines)}`.",
+        ),
+        sep = "\n "
+      ),
+      class = "d2r_io_failed"
+    )
+  }
 
-    profiles <- seq(1L, (length(lines) - 1L) / 2L, by = 1L) %>%
-        subtract(1L) %>%
-        map(~lines[2L * .x + 1L:2L]) %>%
-        map(~append(list(File = .x[1L]),
-            str_match(.x[2],
-                "^([0-9]+)\\ +([0-9]+)\\ +(.*)\\ +([0-9]+)$") %>%
-                array %>% 
-                tail(-1) %>%
-                map_at(vec_c(1L, 2L, 4L), parse_integer)  %>%
-                set_names(c("Start", "Count", "Object", "Filter"))
-            ))
-
-    return(profiles)
+  seq.int(0L, (vec_size(lines) - 1L) / 2L - 1L, by = 1L) %>%
+    map(~ lines[2L * .x + 1L:2L]) %>%
+    map(
+      ~ set_names(
+        list2(
+          .x[1L],
+          !!!str_split(.x[2L], "\\s+")[[1]]
+        ),
+        c("File", "Start", "Count", "Object", "Filter")
+      )
+    )
 }
-
-#' @export
-read_legacy_descriptor <- ReadLegacyDescriptor
