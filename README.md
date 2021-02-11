@@ -38,10 +38,10 @@ library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
     fsigma_2(x_1)
     ```
     
-        ## [90m# A tibble: 1 x 11[39m
+        ## # A tibble: 1 x 11
         ##      JD    Px    Py     P    SG     A  SG_A   Itt     N Ratio               Q
-        ##   [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<int>[39m[23m [3m[90m<int>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<list<dbl[,2]>>[39m[23m
-        ## [90m1[39m   2.5  1.00     0  1.00     0     0     0     1     1     0         [90m[2 × 2][39m
+        ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <int> <int> <dbl> <list<dbl[,2]>>
+        ## 1   2.5  1.00     0  1.00     0     0     0     1     1     0         [2 × 2]
 
   - Simulating total polarization of `1 %` and equal `x` and `y`
     components.
@@ -53,10 +53,10 @@ library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
     fsigma_2(x_2)
     ```
     
-        ## [90m# A tibble: 1 x 11[39m
+        ## # A tibble: 1 x 11
         ##      JD    Px    Py     P    SG     A  SG_A   Itt     N Ratio               Q
-        ##   [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<int>[39m[23m [3m[90m<int>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<list<dbl[,2]>>[39m[23m
-        ## [90m1[39m  12.5 0.707 0.707  1.00     0  22.5     0     1     1     0         [90m[2 × 2][39m
+        ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <int> <int> <dbl> <list<dbl[,2]>>
+        ## 1  12.5 0.707 0.707  1.00     0  22.5     0     1     1     0         [2 × 2]
 
   - Combining two datasets to obtain average over several observations.
     
@@ -65,10 +65,10 @@ library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
     fsigma_2(x_3)
     ```
     
-        ## [90m# A tibble: 1 x 11[39m
+        ## # A tibble: 1 x 11
         ##      JD    Px    Py     P    SG     A  SG_A   Itt     N Ratio               Q
-        ##   [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<int>[39m[23m [3m[90m<int>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<list<dbl[,2]>>[39m[23m
-        ## [90m1[39m   7.5 0.854 0.354 0.924 0.271  11.2  8.16     2     2     0         [90m[2 × 2][39m
+        ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <int> <int> <dbl> <list<dbl[,2]>>
+        ## 1   7.5 0.854 0.354 0.924 0.271  11.2  8.16     2     2     0         [2 × 2]
 
   - Assigning groups, separating observations by `Run`. Recreates two
     original measurements. `fsigma_2` automatically detects grouping
@@ -80,8 +80,8 @@ library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
     fsigma_2(x_4)
     ```
     
-        ## [90m# A tibble: 2 x 12[39m
+        ## # A tibble: 2 x 12
         ##      JD    Px    Py     P    SG     A  SG_A   Itt     N Ratio            Q Run  
-        ##   [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<int>[39m[23m [3m[90m<int>[39m[23m [3m[90m<dbl>[39m[23m [3m[90m<list<dbl[,>[39m[23m [3m[90m<fct>[39m[23m
-        ## [90m1[39m   2.5 1.00  0      1.00     0   0       0     1     1     0      [90m[2 × 2][39m First
-        ## [90m2[39m  12.5 0.707 0.707  1.00     0  22.5     0     1     1     0      [90m[2 × 2][39m Seco…
+        ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <int> <int> <dbl> <list<dbl[,> <fct>
+        ## 1   2.5 1.00  0      1.00     0   0       0     1     1     0      [2 × 2] First
+        ## 2  12.5 0.707 0.707  1.00     0  22.5     0     1     1     0      [2 × 2] Seco…
