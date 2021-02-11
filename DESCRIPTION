@@ -1,6 +1,6 @@
 Package: Dipol2Red
 Title: Dipol-2 Data Reduction Pipeline
-Version: 0.7.1
+Version: 0.7.2
 Authors@R: c(
     person(
         "Ilia", "Kosenkov", 
