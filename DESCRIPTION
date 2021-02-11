@@ -27,7 +27,8 @@ Imports:
 	tidyselect,
 	forcats,
 	lifecycle,
-  glue
+  glue,
+  tidyr
 Suggests: 
   testthat,
   crayon

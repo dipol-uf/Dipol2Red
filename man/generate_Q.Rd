@@ -2,7 +2,7 @@
 % Please edit documentation in R/generate_Q.R
 \name{generate_Q}
 \alias{generate_Q}
-\title{generate_Q}
+\title{Generate weighted variance.}
 \usage{
 generate_Q(p_x, p_y, w_x, w_y, p_x_mean, p_y_mean)
 }
