@@ -69,3 +69,23 @@ err_ok <- function() {
     "v"
   }
 }
+
+err_idx <- function(idx, msg = "Invalid values at position(s):", max = 5L) {
+  len <- vec_size(idx)
+  if (len > 0) {
+    n <- min(len, vec_cast(max, integer()))
+    result <- glue_collapse(
+      glue("`{vec_slice(idx, 1:n)}`"),
+      sep = ", "
+    )
+
+    if (n < len) {
+      result <- glue("{result}, ... ")
+    }
+
+    glue("{msg} {result}.")
+  } else {
+    glue("")
+  }
+
+}
