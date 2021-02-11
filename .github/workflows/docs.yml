@@ -1,4 +1,4 @@
-name: R CMD check
+name: Rebuild README
 
 on:
   push:
@@ -19,14 +19,7 @@ jobs:
   build:
     
 
-    name: ${{ matrix.os }}
-            
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ['Windows-latest', 'ubuntu-latest', 'macOS-latest']
-
-    runs-on: ${{ matrix.os }}
+    runs-on: 'ubuntu-latest'
     
     steps:
       - uses: actions/checkout@v2
@@ -48,9 +41,8 @@ jobs:
       
       - name: Install dependencies
         run: |
-          remotes::install_cran("rcmdcheck")
-          remotes::install_cran("testthat")
-          remotes::install_deps(pkgdir = ".", dependencies = TRUE)
+          remotes::install_cran("rmarkdown")
+          remotes::install_local(".", dependencies = TRUE)
         shell: Rscript {0}
         
       - name: Cache installed R packages
@@ -60,18 +52,16 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/packages.Rds') }}
           restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
         
-      - name: Build & Check package
-        id: integration_tests
+      - name: Generate README
         run: |
-          rcmdcheck::rcmdcheck(path = ".", args = c("--no-manual"), error_on = "warning", check_dir = "check")
+          rmarkdown::render("README.Rmd")
         shell: Rscript {0}
         
-      - name: Upload check results from R integration tests
-        if: failure()
+      - name: Upload artifact
         uses: actions/upload-artifact@main
         with:
-          name:  ${{ matrix.config.os }}
-          path: check
+          name: README
+          path: 'README.md'
 
         
 
