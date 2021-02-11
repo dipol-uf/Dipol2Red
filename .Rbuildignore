@@ -16,3 +16,5 @@ NativeImpl.*
 ^\.github$
 ^docs$
 ^_pkgdown\.yml$
+^\.vs$
+^\.vscode$
