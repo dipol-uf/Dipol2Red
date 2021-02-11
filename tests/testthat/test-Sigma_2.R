@@ -17,8 +17,10 @@ provide_test_data <- function() {
         mustWork = TRUE
       )
     ) %>%
-    map(mutate, Test = 1:n()) %>%
-    map(arrange, sample(1:n()))
+    group_by(File) %>%
+    mutate(Test = 1:n()) %>%
+    arrange(sample(1:n())) %>%
+    ungroup
 }
 
 context("[fsigma_2] tests.")
@@ -26,7 +28,7 @@ test_that("Executing [fsigma_2] on the test data", {
   data <- provide_test_data()
 
   result <- map_dfr(
-    data,
+    data[["Data"]],
     ~ fsigma_2(
       data = .x,
       obs = Obj_1
@@ -64,7 +66,7 @@ test_that("[fsigma_2] handles column names", {
 
 test_that("[fsigma_2] grouped data", {
   data <- provide_test_data()
-  data %>%
+  data[["Data"]] %>%
     imap_dfr(
       ~ mutate(
         .x,
