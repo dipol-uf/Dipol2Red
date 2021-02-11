@@ -18,8 +18,18 @@ provide_test_data <- function() {
       )
     ) %>%
     group_by(File) %>%
-    mutate(Test = 1:n()) %>%
-    arrange(sample(1:n())) %>%
+    mutate(
+      Data = map(
+        Data,
+        mutate, 
+        Test = 1:n()
+      ),
+      Data = map(
+        Data,
+        arrange,
+        sample(1:n())
+      )
+    ) %>%
     ungroup
 }
 

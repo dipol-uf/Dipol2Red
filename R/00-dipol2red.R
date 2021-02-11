@@ -35,6 +35,8 @@
 #' @importFrom stats      pf
 #'
 #' @importFrom readr      read_csv cols read_lines parse_integer
+#' 
+#' @importFrom tidyr      unnest
 #'
 #' @importFrom glue       glue glue_collapse
 NULL
