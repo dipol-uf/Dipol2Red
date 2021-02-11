@@ -48,7 +48,7 @@ read_legacy_descriptor <- function(path) {
 
   seq.int(0L, (vec_size(lines) - 1L) / 2L - 1L, by = 1L) %>%
     map(~ lines[2L * .x + 1L:2L]) %>%
-    map(
+    map_dfr(
       ~ set_names(
         list2(
           .x[1L],
@@ -56,5 +56,6 @@ read_legacy_descriptor <- function(path) {
         ),
         c("File", "Start", "Count", "Object", "Filter")
       )
-    )
+    ) %>%
+    mutate(across(c(Start, Count, Filter), parse_integer))
 }
