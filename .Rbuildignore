@@ -9,3 +9,10 @@ NativeImpl.*
 ^.*src.*o$
 ^.*src.*so$
 ^.*ps-scripts.*$
+^\.Rproj\.user$
+^LICENSE\.md$
+^README\.Rmd$
+^vignettes/rmarkdown.Rmd$
+^\.github$
+^docs$
+^_pkgdown\.yml$
