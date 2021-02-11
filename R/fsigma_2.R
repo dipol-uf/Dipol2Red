@@ -91,18 +91,20 @@ fsigma_2_ <- function(data, date_col, obs_col,
                             extra_vars = NULL,
                             eps,
                             itt_max) {
-    as_tibble(
-        .Call(
-            "d2r_fsigma_2",
-            data, date_col, obs_col,
-            what,  extra_vars,
-            eps, itt_max))
+  as_tibble(
+    d2r_fsigma_2(
+      data, date_col, obs_col,
+      what,  extra_vars,
+      eps, itt_max
+    )
+  )
 }
 
 
 correct_pol_ <- function(data, px = 0, py = 0, angle = 0) {
-    as_tibble(
-        .Call(
-            "d2r_correct_pol",
-            data, px, py, angle))
+  as_tibble(
+    d2r_correct_pol(
+            data, px, py, angle
+    )
+  )
 }

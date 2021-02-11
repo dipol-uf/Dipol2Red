@@ -20,6 +20,7 @@ void debug_print(const std::vector<T> &input)
 	Rcout << " ]" << std::endl << std::endl;
 }
 
+// [[Rcpp::export]]
 SEXP d2r_fsigma_2(
 	SEXP input,
 	SEXP date_col,
@@ -115,6 +116,7 @@ SEXP d2r_fsigma_2(
 }
 
 
+// [[Rcpp::export]]
 SEXP d2r_correct_pol(
 	SEXP data,
 	SEXP px_corr,
