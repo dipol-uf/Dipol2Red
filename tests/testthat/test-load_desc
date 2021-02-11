@@ -17,7 +17,7 @@ test_that("Reading data using legacy descriptor", {
         package = "Dipol2Red",
         mustWork = TRUE
       )
-    ) %T>% print
+    )
 
   expect_equal(vec_size(data), 2)
   expect_equal(vec_size(data[["Data"]][[1]]), 192)
