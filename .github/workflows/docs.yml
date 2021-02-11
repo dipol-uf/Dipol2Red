@@ -54,15 +54,14 @@ jobs:
         
       - name: Generate README
         run: |
+          Sys.setenv(NO_COLOR = "true")
           rmarkdown::render("README.Rmd")
         shell: Rscript {0}
         
-      - name: Upload artifact
-        uses: actions/upload-artifact@main
+      - name: Upload README
+        uses: EndBug/add-and-commit@v7
         with:
-          name: README
-          path: 'README.md'
-
-        
-
-
+          author_name: "actions@github.com"
+          author_email: "GitHub Actions"
+          message: 'Auto-generated README.md'
+          add: 'README.md'
