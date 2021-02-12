@@ -22,7 +22,7 @@ test_that("[h_test] produces correct results", {
     group_split(Filter) %>%
     set_names(map_chr(., ~ vec_slice(.x$Filter, 1L))) %>%
     map(h_test) %>%
-    imap_dfr(~ mutate(.x, Filter = as_factor(.y))) -> test_results
+    imap_dfr(~ mutate(.x, Filter = factor(.y))) -> test_results
 
   expect_equal(
     c(-0.00003, -0.15496, -0.02110),
@@ -52,12 +52,12 @@ test_that("Custom id [h_test2] produces correct results", {
 
   mutate(
     p1,
-    ID = as_factor(letters[1:n()])
+    ID = factor(letters[1:n()])
   ) %>%
     slice_sample(n = vec_size(.)) -> p1
   mutate(
     p2,
-    ID = as_factor(letters[1:n()])
+    ID = factor(letters[1:n()])
   ) %>%
     slice_sample(n = vec_size(.)) -> p2
 
@@ -75,7 +75,7 @@ test_that("[h_test] and [h_test2] produce same results", {
     group_split(Filter) %>%
     set_names(map_chr(., ~ vec_slice(.x$Filter, 1L))) %>%
     map(h_test) %>%
-    imap_dfr(~ mutate(.x, Filter = as_factor(.y))) -> test_results_1
+    imap_dfr(~ mutate(.x, Filter = factor(.y))) -> test_results_1
 
   provide_test_data() -> tmp
   p1 <- filter(tmp, Set == "P1")

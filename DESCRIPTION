@@ -19,13 +19,9 @@ Imports:
   rlang,
   utils,
   stringr,
-  magrittr,
-  assertthat,
 	vctrs,
 	tibble,
 	fs,
-	tidyselect,
-	forcats,
 	lifecycle,
   glue,
   tidyr

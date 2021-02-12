@@ -19,24 +19,12 @@
 #' @importFrom dplyr      across one_of tbl_vars slice rename group_split filter
 #' @importFrom dplyr      slice_sample
 #' 
-#' @importFrom forcats    as_factor
-#'
 #' @importFrom rlang      as_name enquo !! !!! is_null as_function enquos
 #' @importFrom rlang      is_empty is_character syms quo is_missing ensym
 #' @importFrom rlang      ensyms quo_get_env quo_get_expr set_names sym abort
 #' @importFrom rlang      is_double is_integer list2 names2
 #'
-#' @importFrom utils      glob2rx
-#'
-#' @importFrom magrittr   %<>% extract extract2 subtract
-#'
-#' @importFrom assertthat assert_that is.string is.number is.count is.readable
-#'
-#' @importFrom tidyselect vars_select
-#'
 #' @importFrom tibble     tibble is_tibble as_tibble rowid_to_column
-#'
-#' @importFrom stats      pf
 #'
 #' @importFrom readr      read_csv cols read_lines parse_integer
 #' 

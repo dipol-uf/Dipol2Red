@@ -1,27 +1,3 @@
-#   MIT License
-#
-#   Copyright(c) 2019
-#   Ilia Kosenkov [ilia.kosenkov.at.gm@gmail.com],
-#
-#   Permission is hereby granted, free of charge, to any person obtaining a copy
-#   of this software and associated documentation files(the "Software"), to deal
-#   in the Software without restriction, including without limitation the rights
-#   to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-#   copies of the Software, and to permit persons to whom the Software is
-#   furnished to do so, subject to the following conditions:
-#
-#   The above copyright notice and this permission
-#   notice shall be included in all
-#   copies or substantial portions of the Software.
-#
-#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-#   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-#   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-#   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
-#   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 utils::globalVariables(c("temp_n[1]", "temp_n[2]"))
 
 #' @title h_test
@@ -36,8 +12,8 @@ utils::globalVariables(c("temp_n[1]", "temp_n[2]"))
 
 h_test <- function(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N) {
 
-    assert_that(is_tibble(data))
-    assert_that(vec_size(data) == 2L)
+    # assert_that(is_tibble(data))
+    # assert_that(vec_size(data) == 2L)
 
     mean1 <- data %>% slice(1L) %>% select({{ p_x }}, {{ p_y }}) %>% flatten_dbl
     mean2 <- data %>% slice(2L) %>% select({{ p_x }}, {{ p_y }}) %>% flatten_dbl
@@ -90,9 +66,9 @@ utils::globalVariables(c(
 #' @return A \code{data.frame} with test results
 #' @export
 h_test2 <- function(left, right, ..., id, px = Px, py = Py, n = N, q = Q) {
-    assert_that(is_tibble(left))
-    assert_that(is_tibble(right))
-    assert_that(vec_size(left) == vec_size(right))
+    # assert_that(is_tibble(left))
+    # assert_that(is_tibble(right))
+    # assert_that(vec_size(left) == vec_size(right))
 
     extra_cols <- ensyms(...)
 
@@ -181,10 +157,10 @@ deconstructor <- function(what, into) {
     env <- quo_get_env(q)
     expr <- as.list(quo_get_expr(q))
 
-    assert_that(expr[[1]] == sym("c"), msg = "Only `c` can be used to combine names")
+    # assert_that(expr[[1]] == sym("c"), msg = "Only `c` can be used to combine names")
     names <- expr[-1]
 
-    assert_that(vec_size(what) == vec_size(names), msg = "LHS and RHS should have equal length")
+    # assert_that(vec_size(what) == vec_size(names), msg = "LHS and RHS should have equal length")
 
     walk2(what, names, ~assign(as.character(.y), .x, envir = env))
 }
