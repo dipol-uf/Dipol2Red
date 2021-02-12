@@ -1,26 +1,4 @@
-#   MIT License
-#
-#   Copyright(c) 2018-2019
-#   Ilia Kosenkov [ilia.kosenkov.at.gm@gmail.com],
-#
-#   Permission is hereby granted, free of charge, to any person obtaining a copy
-#   of this software and associated documentation files(the "Software"), to deal
-#   in the Software without restriction, including without limitation the rights
-#   to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-#   copies of the Software, and to permit persons to whom the Software is
-#   furnished to do so, subject to the following conditions:
-#
-#   The above copyright notice and this permission
-#   notice shall be included in all
-#   copies or substantial portions of the Software.
-#
-#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-#   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-#   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-#   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
-#   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+utils::globalVariables(c("JD", "Obs", "Q"))
 
 #' @title fsigma_2
 #'
@@ -130,9 +108,9 @@ fsigma_2 <- function(data,
       Q = as_list_of(Q))
 }
 
-#' correct_pol
+#' Corrects polarization
 #'
-#' @param data Input \code{tibble} in \code{sigma_2}/\code{fsigma_2}-compatible format.
+#' @param data Input \code{tibble} in \code{fsigma_2}-compatible format.
 #' @param px Correction to \code{Px}.
 #' @param py Correction to \code{Py}.
 #' @param angle Correction to angle.
@@ -140,18 +118,55 @@ fsigma_2 <- function(data,
 #' @return Updated table.
 #' @export
 correct_pol <- function(data, px = 0, py = 0, angle = 0) {
-    assert_that(is_tibble(data) || is.data.frame(data))
-    assert_that(is.number(px))
-    assert_that(is.number(py))
-    assert_that(is.number(angle))
+  if (!is_tibble(data) && !is.data.frame(data)) {
+    abort(
+      glue(
+        err_invalid_arg(),
+        glue(
+          err_cross(),
+          "`data` has unsupported type of `{vec_ptype_abbr(data)}`.",
+          .sep = " "
+        ),
+        glue(
+          err_info(),
+          "Allowed types are",
+          "`{vec_ptype_abbr(tibble())}` and",
+          "`{vec_ptype_abbr(data.frame())}`.",
+          .sep = " "
+        ),
+        .sep = "\n ",
+        .trim = FALSE
+      ),
+      class = "d2r_invalid_arg"
+    )
+  }
+  px <- vec_assert(
+    vec_cast(eps, double(), x_arg = "px"),
+    size = 1L,
+    arg = "px"
+  )
+  py <- vec_assert(
+    vec_cast(eps, double(), x_arg = "py"),
+    size = 1L,
+    arg = "py"
+  )
+
+  angle <- vec_assert(
+    vec_cast(eps, double(), x_arg = "angle"),
+    size = 1L,
+    arg = "angles"
+  )
+
     correct_pol_(data, px, py, angle)
 }
 
-fsigma_2_ <- function(data, date_col, obs_col,
-                            what,
-                            extra_vars = NULL,
-                            eps,
-                            itt_max) {
+fsigma_2_ <- function(data,
+                      date_col,
+                      obs_col,
+                      what,
+                      extra_vars = NULL,
+                      eps,
+                      itt_max) {
   as_tibble(
     d2r_fsigma_2(
       data, date_col, obs_col,
