@@ -19,7 +19,7 @@ test_that("Reading data using legacy descriptor", {
       )
     )
 
-  expect_equal(vec_size(data), 2)
-  expect_equal(vec_size(data[["Data"]][[1]]), 192)
-  expect_equal(vec_size(data[["Data"]][[2]]), 152)
+  expect_equal(vctrs::vec_size(data), 2)
+  expect_equal(vctrs::vec_size(data[["Data"]][[1]]), 192)
+  expect_equal(vctrs::vec_size(data[["Data"]][[2]]), 152)
 })

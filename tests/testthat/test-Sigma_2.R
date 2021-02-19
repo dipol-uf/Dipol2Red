@@ -17,27 +17,27 @@ provide_test_data <- function() {
         mustWork = TRUE
       )
     ) %>%
-    group_by(File) %>%
-    mutate(
-      Data = map(
+    dplyr::group_by(File) %>%
+    dplyr::mutate(
+      Data = purrr::map(
         Data,
-        mutate, 
-        Test = 1:n()
+        dplyr::mutate, 
+        Test = 1:dplyr::n()
       ),
-      Data = map(
+      Data = purrr::map(
         Data,
-        arrange,
-        sample(1:n())
+        dplyr::arrange,
+        sample(1:dplyr::n())
       )
     ) %>%
-    ungroup
+    dplyr::ungroup
 }
 
 context("[fsigma_2] tests.")
 test_that("Executing [fsigma_2] on the test data", {
   data <- provide_test_data()
 
-  result <- map_dfr(
+  result <- purrr::map_dfr(
     data[["Data"]],
     ~ fsigma_2(
       data = .x,
@@ -45,7 +45,7 @@ test_that("Executing [fsigma_2] on the test data", {
     )
   )
 
-  expect_equal(vec_size(result), 2L)
+  expect_equal(vctrs::vec_size(result), 2L)
   expect_equal(result$JD, c(2458196.11954982, 2458222.0997718))
   expect_equal(result$P, c(0.596071323698895, 0.67155885306917))
   expect_equal(result$A, c(31.6085930431542, 32.7752723359075))
@@ -62,12 +62,12 @@ test_that("[fsigma_2] handles column names", {
     mustWork = TRUE
   )
 
-  data1 <- read_csv(pth)
-  data2 <- data1 %>% set_names(c("NotJD", "Smth", "Obs1234"))
+  data1 <- readr::read_csv(pth)
+  data2 <- data1 %>% rlang::set_names(c("NotJD", "Smth", "Obs1234"))
 
   expect_error(fsigma_2(data2), "Index out of bounds")
 
-  walk2(
+  purrr::walk2(
     fsigma_2(data2, date = NotJD, obs = Obs1234),
     fsigma_2(data2, date = !!sym("NotJD"), obs = !!sym("Obs1234")),
     expect_equal
@@ -77,14 +77,14 @@ test_that("[fsigma_2] handles column names", {
 test_that("[fsigma_2] grouped data", {
   data <- provide_test_data()
   data[["Data"]] %>%
-    imap_dfr(
-      ~ mutate(
+    purrr::imap_dfr(
+      ~ dplyr::mutate(
         .x,
         Group = factor(.y),
         Type = letters[.y]
       )
     ) %>%
-    group_by(Group) -> data
+    dplyr::group_by(Group) -> data
 
   result <- fsigma_2(data = data, date_col = JD, obs_col = Obj_1, Type)
 

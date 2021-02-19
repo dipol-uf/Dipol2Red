@@ -164,7 +164,7 @@ fsigma_2_ <- function(data,
                       extra_vars = NULL,
                       eps,
                       itt_max) {
-  as_tibble(
+  tibble::as_tibble(
     d2r_fsigma_2(
       data, date_col, obs_col,
       what,  extra_vars,
@@ -175,7 +175,7 @@ fsigma_2_ <- function(data,
 
 
 correct_pol_ <- function(data, px = 0, py = 0, angle = 0) {
-  as_tibble(
+  tibble::as_tibble(
     d2r_correct_pol(
       data, px, py, angle
     )

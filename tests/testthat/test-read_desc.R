@@ -10,7 +10,7 @@ test_that("Reading file", {
 
   desc <- read_legacy_descriptor(pth)
 
-  expect_equal(vec_size(desc), 2)
+  expect_equal(vctrs::vec_size(desc), 2)
 
   expect_equal(desc[["File"]], c("test1v.csv", "test2v.csv"))
   expect_equal(desc[["Start"]], c(1L, 1L))
