@@ -5,7 +5,7 @@
 #' @importFrom vctrs      vec_recycle vec_recycle_common vec_slice vec_cbind
 #' @importFrom vctrs      vec_cast list_of as_list_of vec_cast_common
 #' @importFrom vctrs      vec_assert
-#' 
+#'
 #' @importFrom purrr      map imap map_chr keep reduce flatten_chr flatten_dbl
 #' @importFrom purrr      walk2 map2_chr map_at some map_dfr compose map_if
 #' @importFrom purrr      discard map2_lgl imap_dfr
@@ -18,19 +18,20 @@
 #' @importFrom dplyr      transmute group_map is_grouped_df bind_cols bind_rows
 #' @importFrom dplyr      across one_of tbl_vars slice rename group_split filter
 #' @importFrom dplyr      slice_sample
-#' 
+#'
 #' @importFrom rlang      as_name enquo !! !!! is_null as_function enquos
 #' @importFrom rlang      is_empty is_character syms quo is_missing ensym
 #' @importFrom rlang      ensyms quo_get_env quo_get_expr set_names sym abort
-#' @importFrom rlang      is_double is_integer list2 names2
+#' @importFrom rlang      is_double is_integer list2 names2 expr .data .env
 #'
 #' @importFrom tibble     tibble is_tibble as_tibble rowid_to_column
 #'
 #' @importFrom readr      read_csv cols read_lines parse_integer
-#' 
+#'
 #' @importFrom tidyr      unnest
 #'
 #' @importFrom glue       glue glue_collapse
+#'
 NULL
 
 has_crayon <- function() {
@@ -65,21 +66,21 @@ err_ok <- function() {
 }
 
 err_idx <- function(idx, msg = "Invalid values at position(s):", max = 5L) {
-  len <- vec_size(idx)
+  len <- vctrs::vec_size(idx)
   if (len > 0) {
-    n <- min(len, vec_cast(max, integer()))
-    result <- glue_collapse(
-      glue("`{vec_slice(idx, 1:n)}`"),
+    n <- min(len, vctrs::vec_cast(max, integer()))
+    result <- glue::glue_collapse(
+      glue::glue("`{vctrs::vec_slice(idx, seq_len(n))}`"),
       sep = ", "
     )
 
     if (n < len) {
-      result <- glue("{result}, ... ")
+      result <- glue::glue("{result}, etc")
     }
 
-    glue("{msg} {result}.")
+    glue::glue("{msg} {result}.")
   } else {
-    glue("")
+    glue::glue("")
   }
 
 }

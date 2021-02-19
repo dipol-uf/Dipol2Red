@@ -1,3 +1,5 @@
+utils::globalVariables(c("Start", "Count"))
+
 #' Read legacy descriptor
 #' @param path Path to the descriptor file (e.g. \code{Vin.txt})
 #' @export

@@ -1,5 +1,3 @@
-utils::globalVariables(c("JD", "Obs", "Q"))
-
 #' @title fsigma_2
 #'
 #' @param data Input (possibly grouped) tibble/data.frame in long format.
@@ -86,7 +84,7 @@ fsigma_2 <- function(data,
       group_vars(data),
       names2(
         tidyselect::eval_select(
-          rlang::expr(c(...)),
+          expr(c(...)),
           data
         )
       )
@@ -94,7 +92,7 @@ fsigma_2 <- function(data,
   indices <- group_indices(data)
   unique <- sort(unique(indices))
 
-  idx <- map(unique, ~ which(indices == .x))
+  idx <- purrr::map(unique, ~ which(indices == .x))
 
   mutate(
     fsigma_2_(
@@ -104,8 +102,10 @@ fsigma_2 <- function(data,
         what = idx,
         extra_vars = extra_vars,
         eps = eps,
-        itt_max = itt_max),
-      Q = as_list_of(Q))
+        itt_max = itt_max
+      ),
+      Q = as_list_of(.data$Q)
+  )
 }
 
 #' Corrects polarization
@@ -157,7 +157,7 @@ correct_pol <- function(data, px = 0, py = 0, angle = 0) {
     arg = "angles"
   )
 
-    correct_pol_(data, px, py, angle)
+  correct_pol_(data, px, py, angle)
 }
 
 fsigma_2_ <- function(data,
@@ -180,7 +180,7 @@ fsigma_2_ <- function(data,
 correct_pol_ <- function(data, px = 0, py = 0, angle = 0) {
   as_tibble(
     d2r_correct_pol(
-            data, px, py, angle
+      data, px, py, angle
     )
   )
 }

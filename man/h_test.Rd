@@ -2,7 +2,7 @@
 % Please edit documentation in R/h_test.R
 \name{h_test}
 \alias{h_test}
-\title{h_test}
+\title{H-test}
 \usage{
 h_test(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N)
 }

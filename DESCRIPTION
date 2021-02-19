@@ -17,14 +17,15 @@ Imports:
   readr,
   purrr,
   rlang,
-  utils,
+  stats,
   stringr,
 	vctrs,
 	tibble,
 	fs,
 	lifecycle,
   glue,
-  tidyr
+  tidyr,
+  tidyselect
 Suggests: 
   testthat,
   crayon

@@ -11,18 +11,18 @@
 #' @export
 generate_Q <- function(p_x, p_y, w_x, w_y, p_x_mean, p_y_mean) {
 
-  p_x <- vec_cast(p_x, double(), x_arg = "p_x")
-  p_y <- vec_cast(p_y, double(), x_arg = "p_y")
-  w_x <- vec_cast(w_x, double(), x_arg = "w_x")
-  w_x <- vec_cast(w_y, double(), x_arg = "w_y")
+  p_x <- vctrs::vec_cast(p_x, double(), x_arg = "p_x")
+  p_y <- vctrs::vec_cast(p_y, double(), x_arg = "p_y")
+  w_x <- vctrs::vec_cast(w_x, double(), x_arg = "w_x")
+  w_x <- vctrs::vec_cast(w_y, double(), x_arg = "w_y")
 
-  p_x_mean <- vec_cast(
-    vec_assert(p_x_mean, size = 1L),
+  p_x_mean <- vctrs::vec_cast(
+    vctrs::vec_assert(p_x_mean, size = 1L),
     double(),
     x_arg = "p_x_mean"
   )
-  p_y_mean <- vec_cast(
-    vec_assert(p_y_mean, size = 1L),
+  p_y_mean <- vctrs::vec_cast(
+    vctrs::vec_assert(p_y_mean, size = 1L),
     double(),
     x_arg = "p_y_mean"
   )
@@ -40,7 +40,7 @@ generate_Q <- function(p_x, p_y, w_x, w_y, p_x_mean, p_y_mean) {
   w_xy_corr <- w_xy_sum ^ 2 - sum(w_xy ^ 2)
 
   matrix(
-    vec_c(
+    vctrs::vec_c(
       w_x_sum * dot_prod(w_x, (x * x)) / w_x_corr,
       w_xy_sum * dot_prod(w_xy, (y * x)) / w_xy_corr,
       w_xy_sum * dot_prod(w_xy, (x * y)) / w_xy_corr,
@@ -48,4 +48,8 @@ generate_Q <- function(p_x, p_y, w_x, w_y, p_x_mean, p_y_mean) {
     ),
     ncol = 2L
   )
+}
+
+dot_prod <- function(x, y) {
+  sum(x * y)
 }

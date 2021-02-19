@@ -15,11 +15,13 @@ Value from the \code{left} \code{data.frame} is included.}
 \item{id}{Id column to match entries. If absent, row numbers are used
 (\code{tibble::rowid_to_column}).}
 
-\item{px, py}{Column that contains value of Stokes \code{q} and \code{u}, present in both tables/}
+\item{px, py}{Column that contains value of Stokes \code{q} and \code{u},
+present in both tables/}
 
 \item{n}{Column that contains number of data points used to average.}
 
-\item{q}{Column that contains the specific covariance matrix (as \code{list} of \code{matrix})}
+\item{q}{Column that contains the specific covariance matrix
+(as \code{list} of \code{matrix})}
 }
 \value{
 A \code{data.frame} with test results

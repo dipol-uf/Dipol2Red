@@ -7,26 +7,23 @@ load_from_legacy_descriptor <- function(desc, root = ".") {
     desc %>%
     mutate(
       Data = map(
-        fs::path(root, File),
+        fs::path(root, .data$File),
         read_csv,
         col_types = cols()
       ),
       Data = map(
-        Data,
+        .data$Data,
         ~set_names(.x, fix_names(names2(.x)))
       ) %>%
       as_list_of
     )
 
-  with(
+  dplyr::summarise(
     data,
-    map2_lgl(
-        Count,
-        Data,
-        ~.x != vec_size(.y)
-    )
+    invalid = which(purrr::map2_lgl(.data$Count, .data$Data, ~.x != vec_size(.y)))
   ) %>%
-  which -> invalid
+  dplyr::pull("invalid") -> invalid
+
 
   if (vec_size(invalid) > 0L) {
     msg <- err_idx(invalid, "Data mismatch found at position(s):")
