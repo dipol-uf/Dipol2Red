@@ -4,7 +4,14 @@
 \alias{fsigma_2}
 \title{fsigma_2}
 \usage{
-fsigma_2(data, date_col = JD, obs_col = Obs, ..., itt_max = 500L, eps = 1e-16)
+fsigma_2(
+  data,
+  date_col = "JD",
+  obs_col = "Obs",
+  ...,
+  itt_max = 500L,
+  eps = 1e-16
+)
 }
 \arguments{
 \item{data}{Input (possibly grouped) tibble/data.frame in long format.}

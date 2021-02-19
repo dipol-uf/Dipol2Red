@@ -4,7 +4,7 @@
 \alias{h_test2}
 \title{h_test2}
 \usage{
-h_test2(left, right, ..., id, px = Px, py = Py, n = N, q = Q)
+h_test2(left, right, ..., id, px = "Px", py = "Py", n = "N", q = "Q")
 }
 \arguments{
 \item{left, right}{Equal-sized \code{data.frame}s for pairwise testing}

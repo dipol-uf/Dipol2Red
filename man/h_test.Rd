@@ -4,7 +4,7 @@
 \alias{h_test}
 \title{H-test}
 \usage{
-h_test(data, p_x = Px, p_y = Py, sg = SG, cov = Q, n = N)
+h_test(data, p_x = "Px", p_y = "Py", sg = "SG", cov = "Q", n = "N")
 }
 \arguments{
 \item{data}{Two-row input tibble}
