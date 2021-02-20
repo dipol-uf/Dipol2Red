@@ -24,11 +24,11 @@ Imports:
 	fs,
 	lifecycle,
   glue,
-  tidyr,
   tidyselect
 Suggests: 
   testthat,
-  crayon
+  crayon,
+  tidyr
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

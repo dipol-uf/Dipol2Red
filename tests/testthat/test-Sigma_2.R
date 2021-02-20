@@ -21,7 +21,7 @@ provide_test_data <- function() {
     dplyr::mutate(
       Data = purrr::map(
         Data,
-        dplyr::mutate, 
+        dplyr::mutate,
         Test = 1:dplyr::n()
       ),
       Data = purrr::map(
@@ -30,7 +30,7 @@ provide_test_data <- function() {
         sample(1:dplyr::n())
       )
     ) %>%
-    dplyr::ungroup
+    dplyr::ungroup()
 }
 
 context("[fsigma_2] tests.")
@@ -69,7 +69,7 @@ test_that("[fsigma_2] handles column names", {
 
   purrr::walk2(
     fsigma_2(data2, date = NotJD, obs = Obs1234),
-    fsigma_2(data2, date = !!sym("NotJD"), obs = !!sym("Obs1234")),
+    fsigma_2(data2, date = !!rlang::sym("NotJD"), obs = !!rlang::sym("Obs1234")),
     expect_equal
   )
 })

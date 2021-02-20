@@ -15,14 +15,14 @@ h_test <- function(data, p_x = "Px", p_y = "Py", sg = "SG", cov = "Q", n = "N") 
         err_invalid_arg(),
         glue::glue(
           err_cross(),
-          "`data` has unsupported type of `{vec_ptype_abbr(data)}`.",
+          "`data` has unsupported type of `{vctrs::vec_ptype_abbr(data)}`.",
           .sep = " "
         ),
         glue::glue(
           err_info(),
           "Allowed types are",
-          "`{vec_ptype_abbr(tibble())}` and",
-          "`{vec_ptype_abbr(data.frame())}`.",
+          "`{vctrs::vec_ptype_abbr(tibble::tibble())}` and",
+          "`{vctrs::vec_ptype_abbr(data.frame())}`.",
           .sep = " "
         ),
         .sep = "\n ",
@@ -103,14 +103,14 @@ h_test2 <- function(left, right, ..., id,
         err_invalid_arg(),
         glue::glue(
           err_cross(),
-          "`left` has unsupported type of `{vec_ptype_abbr(left)}`.",
+          "`left` has unsupported type of `{vctrs::vec_ptype_abbr(left)}`.",
           .sep = " "
         ),
         glue::glue(
           err_info(),
           "Allowed types are",
-          "`{vec_ptype_abbr(tibble())}` and",
-          "`{vec_ptype_abbr(data.frame())}`.",
+          "`{vctrs::vec_ptype_abbr(tibble::tibble())}` and",
+          "`{vctrs::vec_ptype_abbr(data.frame())}`.",
           .sep = " "
         ),
         .sep = "\n ",
@@ -126,14 +126,14 @@ h_test2 <- function(left, right, ..., id,
         err_invalid_arg(),
         glue::glue(
           err_cross(),
-          "`right` has unsupported type of `{vec_ptype_abbr(right)}`.",
+          "`right` has unsupported type of `{vctrs::vec_ptype_abbr(right)}`.",
           .sep = " "
         ),
         glue::glue(
           err_info(),
           "Allowed types are",
-          "`{vec_ptype_abbr(tibble())}` and",
-          "`{vec_ptype_abbr(data.frame())}`.",
+          "`{vctrs::vec_ptype_abbr(tibble::tibble())}` and",
+          "`{vctrs::vec_ptype_abbr(data.frame())}`.",
           .sep = " "
         ),
         .sep = "\n ",
@@ -150,8 +150,8 @@ h_test2 <- function(left, right, ..., id,
           err_cross(),
           "`left` and `right` should have equal sizes."
         ),
-        "{err_info()} Size of `left` is `{vec_size(left)}`.",
-        "{err_info()} Size of `right` is `{vec_size(right)}`.",
+        "{err_info()} Size of `left` is `{vctrs::vec_size(left)}`.",
+        "{err_info()} Size of `right` is `{vctrs::vec_size(right)}`.",
         .sep = "\n ",
         .trim = FALSE
       )

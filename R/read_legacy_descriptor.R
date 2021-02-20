@@ -32,7 +32,7 @@ read_legacy_descriptor <- function(path) {
       glue::glue(
         "Invalid file contents.",
         "{err_cross()} File is incorrectly formatted.",
-        "{err_info()} Expected odd number of lines, got `{vec_size(lines)}`.",
+        "{err_info()} Expected odd number of lines, got `{vctrs::vec_size(lines)}`.",
         .sep = "\n ",
         .trim = FALSE
       ),

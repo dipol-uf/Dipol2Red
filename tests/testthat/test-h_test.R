@@ -10,7 +10,7 @@ provide_test_data <- function() {
     Set = factor(c("P1", "P2")),
     Path = c(pth_1, pth_2)
   ) %>%
-    dplyr::mutate(Temp = map(Path, readRDS)) %>%
+    dplyr::mutate(Temp = purrr::map(Path, readRDS)) %>%
     tidyr::unnest(Temp) %>%
     dplyr::select(-Path) %>%
     dplyr::mutate(
@@ -57,12 +57,12 @@ test_that("Custom id [h_test2] produces correct results", {
 
   dplyr::mutate(
     p1,
-    ID = factor(letters[1:n()])
+    ID = factor(letters[1:dplyr::n()])
   ) %>%
     dplyr::slice_sample(n = vctrs::vec_size(.)) -> p1
   dplyr::mutate(
     p2,
-    ID = factor(letters[1:n()])
+    ID = factor(letters[1:dplyr::n()])
   ) %>%
     dplyr::slice_sample(n = vctrs::vec_size(.)) -> p2
 

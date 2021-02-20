@@ -28,7 +28,7 @@ fix_names.character <- function(x) {
         ) |
           is.na(.data$Desc),
         glue::glue(""),
-        glue::glue("_({str_replace(.data$Desc, \"\\\\s+\", \"_\")})")
+        glue::glue("_({stringr::str_replace(.data$Desc, \"\\\\s+\", \"_\")})")
       ),
       Id = dplyr::if_else(
         nzchar(.data$Id) & !is.na(.data$Id),
@@ -45,7 +45,7 @@ fix_names.character <- function(x) {
       ),
       Result = glue::glue("{.data$Name}{.data$Id}{.data$Desc}")
     ) %>%
-    pull("Result")
+    dplyr::pull("Result")
 }
 
 #' @rdname fix_names
