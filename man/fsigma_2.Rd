@@ -4,19 +4,28 @@
 \alias{fsigma_2}
 \title{fsigma_2}
 \usage{
-fsigma_2(data, date_col = JD, obs_col = Obs, ..., itt_max = 500L, eps = 1e-16)
+fsigma_2(
+  data,
+  date_col = "JD",
+  obs_col = "Obs",
+  ...,
+  itt_max = 500L,
+  eps = 1e-16
+)
 }
 \arguments{
 \item{data}{Input (possibly grouped) tibble/data.frame in long format.}
 
-\item{date_col}{Date column name (which is quasiquoted), to uniquely identify and order measurements.}
+\item{date_col}{Date column name (which is quasiquoted),
+to uniquely identify and order measurements.}
 
-\item{obs_col}{Column containing magnitude difference between two rays (quasiquoted)}
+\item{obs_col}{Column containing magnitude difference between two rays.}
 
-\item{...}{Names of the extra columns (tidyselected) to include to the output.
+\item{...}{Names of the extra columns inlude in the output.
 Values are taken as the first element in the group.}
 
-\item{itt_max}{\code{integer}, limits number of iterations to perform. Typically, \code{50} is enough.}
+\item{itt_max}{\code{integer}, limits number of iterations to perform.
+Typically, \code{50} is enough.}
 
 \item{eps}{\code{double}, controls the convergence.}
 }
@@ -24,6 +33,7 @@ Values are taken as the first element in the group.}
 Computed polarization parameters in form of a \code{tibble}
 }
 \description{
-Performs the same task as \code{Dipol2Red::sigma_2} using \code{C++} implementation.
+Performs the same task as \code{Dipol2Red::sigma_2} using
+\code{C++} implementation.
 Much faster but requires calibration of data.
 }

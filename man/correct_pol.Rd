@@ -2,12 +2,12 @@
 % Please edit documentation in R/fsigma_2.R
 \name{correct_pol}
 \alias{correct_pol}
-\title{correct_pol}
+\title{Corrects polarization}
 \usage{
 correct_pol(data, px = 0, py = 0, angle = 0)
 }
 \arguments{
-\item{data}{Input \code{tibble} in \code{sigma_2}/\code{fsigma_2}-compatible format.}
+\item{data}{Input \code{tibble} in \code{fsigma_2}-compatible format.}
 
 \item{px}{Correction to \code{Px}.}
 
@@ -19,5 +19,5 @@ correct_pol(data, px = 0, py = 0, angle = 0)
 Updated table.
 }
 \description{
-correct_pol
+Corrects polarization
 }

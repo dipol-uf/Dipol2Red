@@ -1,6 +1,6 @@
 Package: Dipol2Red
 Title: Dipol-2 Data Reduction Pipeline
-Version: 0.7.2
+Version: 0.8.0
 Authors@R: c(
     person(
         "Ilia", "Kosenkov", 
@@ -13,20 +13,22 @@ Depends: R (>= 3.5)
 LinkingTo: Rcpp
 Imports:
 	Rcpp,
-    dplyr,
-    readr,
-    purrr,
-    rlang,
-    utils,
-    stringr,
-    magrittr,
-    assertthat,
+  dplyr,
+  readr,
+  purrr,
+  rlang,
+  stats,
+  stringr,
 	vctrs,
 	tibble,
 	fs,
-	tidyselect,
-	forcats,
-	lifecycle
+	lifecycle,
+  glue,
+  tidyselect
+Suggests: 
+  testthat,
+  crayon,
+  tidyr
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -35,4 +37,3 @@ URL: https://github.com/dipol-uf/Dipol2Red
 BugReports: https://github.com/dipol-uf/Dipol2Red/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Suggests: testthat

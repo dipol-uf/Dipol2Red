@@ -1,49 +1,49 @@
-#   MIT License
-#
-#   Copyright(c) 2018
-#   Ilia Kosenkov [ilia.kosenkov.at.gm@gmail.com],
-#   Vilppu Piirola
-#
-#   Permission is hereby granted, free of charge, to any person obtaining a copy
-#   of this software and associated documentation files(the "Software"), to deal
-#   in the Software without restriction, including without limitation the rights
-#   to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-#   copies of the Software, and to permit persons to whom the Software is
-#   furnished to do so, subject to the following conditions:
-#
-#   The above copyright notice and this permission
-#   notice shall be included in all
-#   copies or substantial portions of the Software.
-#
-#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-#   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-#   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-#   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
-#   THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
-#' @title LoadFromLegacyDescriptor
-#' @param desc Descriptors as output from \code{ReadLegacyDescriptor}.
+#' load_from_legacy_descriptor
+#' @param desc Descriptors as output from \code{read_legacy_descriptor}.
 #' @param root Root for the files in the descriptor.
-#' @aliases load_from_legacy_descriptor
 #' @export
-LoadFromLegacyDescriptor <- function(desc, root = ".") {
-    data <- desc %>%
-        map(extract2, "File") %>%
-        map_if(~nzchar(root), ~ fs::path(root, .x)) %>%
-        map(read_csv, col_types = cols()) %>%
-        map(~set_names(.x, fix_names(names(.x))))
+load_from_legacy_descriptor <- function(desc, root = ".") {
+  data <-
+    desc %>%
+    dplyr::mutate(
+      Data = purrr::map(
+        fs::path(root, .data$File),
+        readr::read_csv,
+        col_types = readr::cols()
+      ),
+      Data = purrr::map(
+        .data$Data,
+        ~rlang::set_names(.x, fix_names(rlang::names2(.x)))
+      ) %>%
+      vctrs::as_list_of()
+    )
 
-    walk2(data, desc, function(obs, des) {
-            if (vec_size(obs) != des$Count)
-                warning(paste0("Read number of observations (", nrow(obs), ") ",
-                    "does not match expected number (", des$Count, ")."))
-            })
+  dplyr::summarise(
+    data,
+    invalid = which(
+      purrr::map2_lgl(
+        .data$Count,
+        .data$Data,
+        ~.x != vctrs::vec_size(.y)
+      )
+    )
+  ) %>%
+  dplyr::pull("invalid") -> invalid
 
-    return(data)
+
+  if (vctrs::vec_size(invalid) > 0L) {
+    msg <- err_idx(invalid, "Data mismatch found at position(s):")
+    rlang::abort(
+      glue::glue(
+        "Read data does not match its descriptor.",
+        "{err_cross()} {msg}",
+        "{err_info()} Make sure descriptor contains up to date information.",
+        .sep = "\n ",
+        .trim = FALSE
+      ),
+      class = "d2r_io_failed"
+    )
+  }
+
+  data
 }
-
-#' @export
-load_from_legacy_descriptor <- LoadFromLegacyDescriptor
