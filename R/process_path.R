@@ -5,7 +5,7 @@
 #'
 #' @return A list of tibbles
 #' @export
-process_files <- function(path, by = 4L) {
+process_files <- function(path = "*.csv", by = 4L) {
   files <- Sys.glob(path)
   files <- rlang::set_names(files, fs::path_file(files))
 
@@ -53,7 +53,7 @@ process_files <- function(path, by = 4L) {
       ) -> result_full
 
     data %>%
-      dplyr::mutate(Id = factor((1:n() - 1L) %/% (4L * by))) %>%
+      dplyr::mutate(Id = factor((1:dplyr::n() - 1L) %/% (4L * by))) %>%
       dplyr::group_by(.data$Id) %>%
       fsigma_2(date_col = "JD", obs_col = !!nm) %>%
       dplyr::select(
