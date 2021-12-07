@@ -4,8 +4,7 @@ on:
   push:
     tags: 
       - 'v*'
-  workflow_dispatch:
-   
+  
 jobs:
   release:
     
@@ -59,4 +58,9 @@ jobs:
       - name: Test
         run: |
           R CMD check $PACKAGE_NAME --no-manual --as-cran
+          
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{env.PACKAGE_NAME}}
         
