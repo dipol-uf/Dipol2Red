@@ -38,7 +38,7 @@ library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
     fsigma_2(x_1)
     ```
     
-        ## # A tibble: 1 x 11
+        ## # A tibble: 1 × 11
         ##      JD    Px    Py     P    SG     A  SG_A   Itt     N Ratio               Q
         ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <int> <int> <dbl> <list<dbl[,2]>>
         ## 1   2.5  1.00     0  1.00     0     0     0     1     1     0         [2 × 2]
@@ -53,7 +53,7 @@ library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
     fsigma_2(x_2)
     ```
     
-        ## # A tibble: 1 x 11
+        ## # A tibble: 1 × 11
         ##      JD    Px    Py     P    SG     A  SG_A   Itt     N Ratio               Q
         ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <int> <int> <dbl> <list<dbl[,2]>>
         ## 1  12.5 0.707 0.707  1.00     0  22.5     0     1     1     0         [2 × 2]
@@ -65,7 +65,7 @@ library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
     fsigma_2(x_3)
     ```
     
-        ## # A tibble: 1 x 11
+        ## # A tibble: 1 × 11
         ##      JD    Px    Py     P    SG     A  SG_A   Itt     N Ratio               Q
         ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <int> <int> <dbl> <list<dbl[,2]>>
         ## 1   7.5 0.854 0.354 0.924 0.271  11.2  8.16     2     2     0         [2 × 2]
@@ -80,7 +80,7 @@ library(Dipol2Red, quietly = TRUE, warn.conflicts = FALSE)
     fsigma_2(x_4)
     ```
     
-        ## # A tibble: 2 x 12
+        ## # A tibble: 2 × 12
         ##      JD    Px    Py     P    SG     A  SG_A   Itt     N Ratio            Q Run  
         ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <int> <int> <dbl> <list<dbl[,> <fct>
         ## 1   2.5 1.00  0      1.00     0   0       0     1     1     0      [2 × 2] First
