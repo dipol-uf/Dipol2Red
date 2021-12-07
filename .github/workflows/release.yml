@@ -52,7 +52,7 @@ jobs:
       
       - name: Determine package name
         run: |
-          $packageName = $(Rscript.exe -e " glue::glue(\`"Dipol2Red_{desc::desc_get_version()}.tar.gz\`")")
+          $packageName = $(Rscript -e " glue::glue(\`"Dipol2Red_{desc::desc_get_version()}.tar.gz\`")")
           echo "PACKAGE_NAME=$packageName" | Out-File -FilePath $env:GITHUB_ENV -Append
         shell: pwsh
 
