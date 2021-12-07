@@ -1,6 +1,10 @@
 
 # `Dipol2Red`
 
+
+[![DOI](https://zenodo.org/badge/157691595.svg)](https://zenodo.org/badge/latestdoi/157691595)
+
+
 `Dipol2Red` is a package for reducing data obtained with a
 double-imaging polarimeter *Dipol-2* (and any later versions of *Dipol*
 family polarimeters).
