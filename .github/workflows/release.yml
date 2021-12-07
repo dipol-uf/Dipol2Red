@@ -1,0 +1,64 @@
+name: R CMD check
+
+on:
+  push:
+    tags: 
+      - 'v*'
+    branch:
+      - 'release-ci'
+    workflow_dispatch:
+    
+jobs:
+  release:
+    
+
+    name: Create release
+            
+    runs-on: 'ubuntu-latest'
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v1
+        with:
+          r-version: release
+      
+      - name: Set up Pandoc
+        uses: r-lib/actions/setup-pandoc@v1
+      
+      - name: Get dependencies for integration testing
+        run: |
+          install.packages('remotes')
+          saveRDS(remotes::dev_package_deps(pkgdir = ".", dependencies = TRUE), ".github/packages.Rds", version = 2)
+          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+        shell: Rscript {0}
+
+      - name: Cache installed R packages
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/packages.Rds') }}
+          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+      
+      - name: Install dependencies
+        run: |
+          remotes::install_cran("rcmdcheck")
+          remotes::install_cran("testthat")
+          remotes::install_deps(pkgdir = ".", dependencies = TRUE)
+          remotes::install_cran("desc")
+          remotes::install_cran("glue")
+        shell: Rscript {0}
+        
+      - name: Build
+        run: R CMD build .
+      
+      - name: Determine package name
+        run: |
+          $packageName = $(Rscript.exe -e " glue::glue(\`"Dipol2Red_{desc::desc_get_version()}.tar.gz\`")")
+          echo "PACKAGE_NAME=$packageName" | Out-File -FilePath $env:GITHUB_ENV -Append
+        shell: pwsh
+
+      - name: Test
+        run: |
+          R CMD check $PACKAGE_NAME
+        
