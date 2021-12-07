@@ -1,0 +1,23 @@
+{
+  "creators": [
+      {   
+          "orcid": "0000-0001-5563-7840",
+          "name": "Kosenkov, Ilia A."
+      }
+  ],    
+
+  "license": "MIT",
+
+  "title": "Dipol2Red: Linear polarization data reduction pipeline for DIPol-2 and DIPol-UF polarimeters",
+
+  "related_identifiers": [
+      {
+          "scheme": "ads",
+          "identifier": "1975AASF..418.....P",
+          "relation": "isDocumentedBy",
+          "resource_type": "thesis"
+      }
+  ],
+
+  "keywords": ["Polarimetry", "Data Analysis", "Data Reduction", "R"]   
+}
