@@ -18,3 +18,4 @@ NativeImpl.*
 ^_pkgdown\.yml$
 ^\.vs$
 ^\.vscode$
+.zenodo.json
